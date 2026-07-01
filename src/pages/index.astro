@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { activities } from '../data/activities'
-import { planningDays } from '../data/planning'
 import { orderedDays, dayLabels } from '../data/trip'
 
 const base = import.meta.env.BASE_URL
@@ -170,36 +169,28 @@ const allTypes = [...new Set(activities.map(a => a.type))]
     </div>
   </section>
 
-  <!-- ── Planning preview ───────────────────────────────────────────────────── -->
+  <!-- ── Planning preview — agenda ────────────────────────────────────────── -->
   <section class="planning-preview">
     <div class="shell">
       <div class="section-header">
         <h2 class="section-title">Le programme</h2>
+        <a href={`${base}planning/`} class="btn btn-ghost">Voir tout →</a>
       </div>
-      <div class="days-preview">
-        {planningDays.slice(0, 4).map((day) => (
-          <div class="day-row">
-            <div class="day-num">
-              <span>J{day.day}</span>
+      <div class="agenda">
+        {orderedDays.map(d => (
+          <div class="agenda-row" data-day={d}>
+            <div class="agenda-date">
+              <span class="agenda-jnum">J{dayLabels[d].dayNumber}</span>
+              <span class="agenda-datestr">
+                {dayLabels[d].short} {dayLabels[d].date.slice(8)}
+              </span>
             </div>
-            <div class="day-info">
-              <p class="day-date">{new Date(day.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })}</p>
-              <p class="day-title-text">{day.title}</p>
-            </div>
-            <div class="day-acts">
-              {day.activities.length > 0
-                ? day.activities.map(a => {
-                    const act = activities.find(x => x.slug === a.activitySlug)
-                    return act ? <span class="day-tag">{act.name}</span> : null
-                  })
-                : <span class="day-free">Journée libre</span>
-              }
+            <div class="agenda-divider"></div>
+            <div class="agenda-acts" id={`agenda-${d}`}>
+              <span class="agenda-empty">Journée libre</span>
             </div>
           </div>
         ))}
-        <div class="days-more">
-          <a href={`${base}planning/`} class="btn btn-primary">Planning complet →</a>
-        </div>
       </div>
     </div>
   </section>
@@ -270,6 +261,45 @@ const allTypes = [...new Set(activities.map(a => a.type))]
     })
   })
 
+</script>
+
+<script>
+  // ── Agenda — hydratation depuis Supabase ───────────────────────────────────
+  import { getAssignments, subscribeToChanges } from '../lib/assignments'
+  import { activities } from '../data/activities'
+
+  const bySlug = Object.fromEntries(activities.map(a => [a.slug, a]))
+
+  function renderAgenda(assignmentMap: Map<string, { day: string | null; done: boolean }>) {
+    const byDay: Record<string, typeof activities> = {}
+    for (const [slug, a] of assignmentMap) {
+      if (a.day) {
+        if (!byDay[a.day]) byDay[a.day] = []
+        const act = bySlug[slug]
+        if (act) byDay[a.day].push(act)
+      }
+    }
+    document.querySelectorAll<HTMLElement>('.agenda-row').forEach(row => {
+      const day = row.dataset.day!
+      const el  = document.getElementById(`agenda-${day}`)
+      if (!el) return
+      const acts = byDay[day] ?? []
+      if (acts.length === 0) {
+        el.innerHTML = '<span class="agenda-empty">Journée libre</span>'
+      } else {
+        el.innerHTML = acts.map(a =>
+          `<span class="agenda-tag agenda-tag--${a.type}">${a.name}</span>`
+        ).join('')
+      }
+    })
+  }
+
+  async function initAgenda() {
+    const map = await getAssignments()
+    renderAgenda(map)
+    subscribeToChanges(() => getAssignments().then(renderAgenda))
+  }
+  initAgenda()
 </script>
 
 <script>
@@ -511,7 +541,7 @@ const allTypes = [...new Set(activities.map(a => a.type))]
   .flip-card {
     perspective: 1000px;
     cursor: pointer;
-    height: 280px;
+    height: 220px;
     outline: none;
   }
 
@@ -593,17 +623,17 @@ const allTypes = [...new Set(activities.map(a => a.type))]
 
   .fcc-body {
     background: var(--color-stone-card);
-    padding: 0.9rem 1rem;
+    padding: 0.65rem 0.85rem;
     height: 32%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.25rem;
+    gap: 0.2rem;
   }
 
   .fcc-name {
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 500;
     color: var(--color-basalt);
     line-height: 1.2;
@@ -620,10 +650,10 @@ const allTypes = [...new Set(activities.map(a => a.type))]
   /* Verso */
   .fcb-inner {
     height: 100%;
-    padding: 1.25rem;
+    padding: 0.9rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.35rem;
     border: 1px solid var(--color-stone-deep);
     border-radius: var(--radius-card);
   }
@@ -644,13 +674,13 @@ const allTypes = [...new Set(activities.map(a => a.type))]
   }
 
   .fcb-desc {
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: var(--color-basalt-soft);
-    line-height: 1.55;
+    line-height: 1.5;
     flex: 1;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
   }
 
@@ -808,86 +838,98 @@ const allTypes = [...new Set(activities.map(a => a.type))]
 
   .fcb-link:hover { color: var(--color-paradise); }
 
-  /* ── Planning preview ───────────────────────────────────────────────────── */
+  /* ── Planning preview — agenda ──────────────────────────────────────────── */
   .planning-preview {
     padding-block: 5rem;
     background: var(--color-stone-card);
   }
 
-  .days-preview {
+  .agenda {
     display: flex;
     flex-direction: column;
+    gap: 0;
+    margin-top: 2rem;
     border: 1px solid var(--color-stone-deep);
     border-radius: 16px;
     overflow: hidden;
-    margin-top: 2rem;
   }
 
-  .day-row {
+  .agenda-row {
     display: grid;
-    grid-template-columns: 3.5rem 1fr auto;
-    gap: 1.5rem;
-    align-items: center;
-    padding: 1.25rem 1.5rem;
-    background: var(--color-stone-card);
+    grid-template-columns: 6rem 1px 1fr;
+    gap: 0;
+    align-items: stretch;
+    min-height: 3.5rem;
     border-bottom: 1px solid var(--color-stone-deep);
-    transition: background 0.2s;
+    transition: background 0.15s;
   }
 
-  .day-row:last-of-type { border-bottom: none; }
-  .day-row:hover { background: var(--color-stone); }
+  .agenda-row:last-child { border-bottom: none; }
+  .agenda-row:hover { background: var(--color-stone); }
 
-  .day-num {
+  .agenda-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.75rem 1rem;
+    flex-shrink: 0;
+  }
+
+  .agenda-jnum {
     font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 300;
+    font-size: 1.2rem;
+    font-weight: 400;
     color: var(--color-ocean);
+    line-height: 1;
+  }
+
+  .agenda-datestr {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-basalt-faint);
     text-align: center;
   }
 
-  .day-date {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-basalt-faint);
-    margin-bottom: 0.2rem;
+  .agenda-divider {
+    width: 1px;
+    background: var(--color-stone-deep);
+    align-self: stretch;
   }
 
-  .day-title-text {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--color-basalt);
-  }
-
-  .day-acts {
+  .agenda-acts {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: flex-end;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1.25rem;
+    min-height: 3.5rem;
   }
 
-  .day-tag {
-    font-size: 12px;
-    padding: 0.25rem 0.75rem;
-    background: var(--color-ocean);
-    color: var(--color-stone);
-    border-radius: 100px;
-    white-space: nowrap;
-  }
-
-  .day-free {
+  .agenda-empty {
     font-size: 12px;
     color: var(--color-basalt-faint);
     font-style: italic;
   }
 
-  .days-more {
-    padding: 1.5rem;
-    display: flex;
-    justify-content: center;
-    background: var(--color-stone-card);
+  .agenda-tag {
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 0.2rem 0.65rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    background: rgba(30, 74, 107, 0.1);
+    color: var(--color-ocean);
   }
+
+  .agenda-tag--surf      { background: rgba(30,74,107,.1);   color: #1E4A6B; }
+  .agenda-tag--rando     { background: rgba(59,107,69,.1);   color: #3B6B45; }
+  .agenda-tag--restaurant{ background: rgba(224,107,44,.1);  color: #E06B2C; }
+  .agenda-tag--viewpoint { background: rgba(127,168,190,.2); color: #4A7B90; }
+  .agenda-tag--swim      { background: rgba(58,117,153,.1);  color: #3A7599; }
+  .agenda-tag--other     { background: rgba(122,138,146,.1); color: #7A8A92; }
 
   /* ── Map preview ────────────────────────────────────────────────────────── */
   .map-preview {
@@ -944,7 +986,7 @@ const allTypes = [...new Set(activities.map(a => a.type))]
   /* ── Responsive ─────────────────────────────────────────────────────────── */
   @media (max-width: 1024px) {
     .mosaic-grid { grid-template-columns: repeat(3, 1fr); }
-    .flip-card { height: 260px; }
+    .flip-card { height: 210px; }
   }
 
   @media (max-width: 768px) {
@@ -952,13 +994,12 @@ const allTypes = [...new Set(activities.map(a => a.type))]
     .mosaic-grid { grid-template-columns: repeat(2, 1fr); }
     .map-preview-inner { grid-template-columns: 1fr; }
     .map-preview-thumb { order: -1; }
-    .day-row { grid-template-columns: 3rem 1fr; }
-    .day-acts { display: none; }
+    .agenda-row { grid-template-columns: 5rem 1px 1fr; }
   }
 
   @media (max-width: 480px) {
     .mosaic-grid { grid-template-columns: 1fr 1fr; }
-    .flip-card { height: 240px; }
+    .flip-card { height: 200px; }
     .hero { padding-bottom: 4rem; }
     .activities-home, .planning-preview, .map-preview { padding-block: 3.5rem; }
   }
