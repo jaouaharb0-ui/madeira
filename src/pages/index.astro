@@ -893,14 +893,9 @@ const allTypes = [...new Set(activities.map(a => a.type))]
     gap: 0.35rem;
   }
 
-  .agenda-empty {
-    font-size: 11px;
-    color: var(--color-basalt-faint);
-    text-align: center;
-    margin-top: 0.25rem;
-  }
 
-  .agenda-tag {
+
+  :global(.agenda-tag) {
     font-size: 10.5px;
     font-weight: 500;
     padding: 0.2rem 0.45rem;
@@ -911,17 +906,18 @@ const allTypes = [...new Set(activities.map(a => a.type))]
     display: block;
   }
 
-  .agenda-tag:not(:only-child)::before {
+  :global(.agenda-tag:not(:only-child)::before) {
     content: "· ";
     opacity: 0.6;
   }
 
-  .agenda-tag--surf      { background: rgba(30,74,107,.12);  color: #1E4A6B; }
-  .agenda-tag--rando     { background: rgba(59,107,69,.12);  color: #3B6B45; }
-  .agenda-tag--restaurant{ background: rgba(224,107,44,.12); color: #C05820; }
-  .agenda-tag--viewpoint { background: rgba(127,168,190,.2); color: #4A7B90; }
-  .agenda-tag--swim      { background: rgba(58,117,153,.12); color: #3A7599; }
-  .agenda-tag--other     { background: rgba(122,138,146,.12);color: #7A8A92; }
+  :global(.agenda-tag--surf)       { background: rgba(30,74,107,.12);  color: #1E4A6B; }
+  :global(.agenda-tag--rando)      { background: rgba(59,107,69,.12);  color: #3B6B45; }
+  :global(.agenda-tag--restaurant) { background: rgba(224,107,44,.12); color: #C05820; }
+  :global(.agenda-tag--viewpoint)  { background: rgba(127,168,190,.2); color: #4A7B90; }
+  :global(.agenda-tag--swim)       { background: rgba(58,117,153,.12); color: #3A7599; }
+  :global(.agenda-tag--other)      { background: rgba(122,138,146,.12);color: #7A8A92; }
+  :global(.agenda-empty)           { font-size: 11px; color: var(--color-basalt-faint); text-align: center; margin-top: 0.25rem; }
 
   /* ── Map preview ────────────────────────────────────────────────────────── */
   .map-preview {
