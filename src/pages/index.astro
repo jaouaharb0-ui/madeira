@@ -911,6 +911,11 @@ const allTypes = [...new Set(activities.map(a => a.type))]
     display: block;
   }
 
+  .agenda-tag:not(:only-child)::before {
+    content: "· ";
+    opacity: 0.6;
+  }
+
   .agenda-tag--surf      { background: rgba(30,74,107,.12);  color: #1E4A6B; }
   .agenda-tag--rando     { background: rgba(59,107,69,.12);  color: #3B6B45; }
   .agenda-tag--restaurant{ background: rgba(224,107,44,.12); color: #C05820; }
