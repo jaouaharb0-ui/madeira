@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+/* ─── Design tokens — Variation A : Brume Atlantique ───────────────────────── */
+@theme {
+  /* Fonds */
+  --color-stone:       #E8E4DD;
+  --color-stone-deep:  #D8D2C8;
+  --color-stone-card:  #EFEAE3;
+
+  /* Texte */
+  --color-basalt:      #161A1D;
+  --color-basalt-soft: #3A4248;
+  --color-basalt-faint:#7A8A92;
+
+  /* Océan Atlantique */
+  --color-ocean:       #1E4A6B;
+  --color-ocean-mid:   #3A7599;
+  --color-mist:        #7FA8BE;
+
+  /* Accent chaud — strelitzia (fleur d'oiseau de paradis) */
+  --color-paradise:      #E06B2C;
+  --color-paradise-deep: #B84E1A;
+
+  /* Nature */
+  --color-laurel:      #3B6B45;
+
+  /* Typo */
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* Layout */
+  --spacing-gutter: clamp(1.25rem, 5vw, 4rem);
+  --spacing-maxw:   1280px;
+
+  /* Radius & ombre */
+  --radius-card:    20px;
+  --shadow-card:    0 24px 60px -30px rgba(22, 26, 29, 0.45);
+  --shadow-soft:    0 8px 30px -12px rgba(22, 26, 29, 0.25);
+}
+
+/* ─── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--color-stone);
+  color: var(--color-basalt);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ─── Utilitaires layout ────────────────────────────────────────────────────── */
+.shell {
+  width: 100%;
+  max-width: var(--spacing-maxw);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* ─── Eyebrow label ─────────────────────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-basalt-faint);
+}
+
+.eyebrow::before {
+  content: '— ';
+  color: var(--color-paradise);
+}
+
+/* ─── Bouton principal ──────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background-color: var(--color-ocean);
+  color: var(--color-stone);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-ocean-mid);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-basalt);
+  border: 1.5px solid var(--color-stone-deep);
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-ocean);
+  color: var(--color-ocean);
+}
+
+/* ─── Carte activité ────────────────────────────────────────────────────────── */
+.activity-card {
+  position: relative;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--color-stone-card);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: block;
+}
+
+.activity-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 40px 80px -30px rgba(22, 26, 29, 0.55);
+}
+
+.activity-card:hover .card-accent {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.card-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-paradise);
+  opacity: 0;
+  transform: scaleY(0.6);
+  transform-origin: bottom;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.card-photo {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.card-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.activity-card:hover .card-photo img {
+  transform: scale(1.04);
+}
+
+.card-photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(22,26,29,0.5) 0%, transparent 50%);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ocean-mid);
+  margin-bottom: 0.5rem;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--color-basalt);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.card-desc {
+  font-size: 14px;
+  color: var(--color-basalt-soft);
+  line-height: 1.6;
+}
+
+/* ─── Filtre boutons ────────────────────────────────────────────────────────── */
+.filter-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: 1.5px solid var(--color-stone-deep);
+  background: transparent;
+  color: var(--color-basalt-soft);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: var(--color-ocean);
+  border-color: var(--color-ocean);
+  color: var(--color-stone);
+}
+
+/* ─── Réduction de mouvement ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

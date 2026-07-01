@@ -1,0 +1,339 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { activities } from '../data/activities'
+import { dayLabels } from '../data/trip'
+
+const base = import.meta.env.BASE_URL
+
+const typeConfig: Record<string, { label: string; color: string; icon: string }> = {
+  surf:       { label: 'Surf',         color: '#1E4A6B', icon: '🏄' },
+  rando:      { label: 'Randonnée',    color: '#3B6B45', icon: '🥾' },
+  restaurant: { label: 'Restaurant',   color: '#E06B2C', icon: '🍽' },
+  viewpoint:  { label: 'Point de vue', color: '#7FA8BE', icon: '🔭' },
+  swim:       { label: 'Baignade',     color: '#3A7599', icon: '🏊' },
+  other:      { label: 'Autre',        color: '#7A8A92', icon: '📍' },
+}
+
+const activitiesJson = JSON.stringify(activities.map(a => ({
+  slug: a.slug,
+  name: a.name,
+  type: a.type,
+  photo: a.photos[0],
+  shortDescription: a.shortDescription,
+  coordinates: a.coordinates,
+  dayLabel: a.day ? dayLabels[a.day].long : null,
+})))
+
+const typeConfigJson = JSON.stringify(typeConfig)
+const baseUrl = base
+---
+
+<BaseLayout title="Carte" description="Carte interactive de tous nos spots à Madère.">
+  <div class="map-page">
+    <!-- Nav flottante au-dessus de la carte -->
+    <div class="map-controls">
+      <div class="map-filters" role="group" aria-label="Filtrer les markers">
+        <button class="map-filter-btn active" data-type="all">Tout</button>
+        {Object.entries(typeConfig).map(([type, cfg]) => (
+          <button class="map-filter-btn" data-type={type} style={`--dot: ${cfg.color}`}>
+            <span class="mfb-dot"></span>
+            {cfg.label}
+          </button>
+        ))}
+      </div>
+      <div class="map-legend">
+        {Object.entries(typeConfig).map(([type, cfg]) => (
+          <span class="legend-item">
+            <span class="legend-dot" style={`background:${cfg.color}`}></span>
+            {cfg.label}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <div id="map" class="map-container"></div>
+  </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" is:inline></script>
+
+<script define:vars={{ activitiesJson, typeConfigJson, baseUrl }}>
+  const activities = JSON.parse(activitiesJson)
+  const typeConfig = JSON.parse(typeConfigJson)
+
+  // ── Init carte centrée sur Madère ────────────────────────────────────────
+  const map = L.map('map', {
+    center: [32.7, -17.0],
+    zoom: 10,
+    zoomControl: false,
+  })
+
+  L.control.zoom({ position: 'bottomright' }).addTo(map)
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18,
+  }).addTo(map)
+
+  // ── Marker factory ────────────────────────────────────────────────────────
+  function makeIcon(type, active = true) {
+    const cfg = typeConfig[type] || typeConfig.other
+    const color = cfg.color
+    const opacity = active ? '1' : '0.35'
+    return L.divIcon({
+      className: '',
+      html: `
+        <div style="position:relative;width:36px;height:36px;opacity:${opacity};transition:opacity .2s">
+          <div style="width:36px;height:36px;background:${color};border:3px solid #E8E4DD;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);box-shadow:0 4px 16px rgba(22,26,29,.35)"></div>
+          <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);font-size:14px;line-height:1">${cfg.icon}</span>
+        </div>
+      `,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -38],
+    })
+  }
+
+  // ── Markers + popups ──────────────────────────────────────────────────────
+  const markersByType = {}
+
+  activities.forEach(activity => {
+    const cfg = typeConfig[activity.type] || typeConfig.other
+    const marker = L.marker(
+      [activity.coordinates.lat, activity.coordinates.lng],
+      { icon: makeIcon(activity.type) }
+    )
+
+    const dayBadge = activity.dayLabel
+      ? `<span class="popup-day">📅 ${activity.dayLabel}</span>`
+      : ''
+
+    marker.bindPopup(L.popup({
+      maxWidth: 300,
+      className: 'custom-popup',
+      closeButton: false,
+    }).setContent(`
+      <div class="popup-inner">
+        <img class="popup-photo" src="${activity.photo}" alt="${activity.name}" width="88" height="88" />
+        <div class="popup-body">
+          <p class="popup-type">${cfg.icon} ${cfg.label}</p>
+          <h3 class="popup-title">${activity.name}</h3>
+          ${dayBadge}
+          <a href="${baseUrl}activities/${activity.slug}/" class="popup-link">Voir la fiche →</a>
+        </div>
+      </div>
+    `))
+
+    marker.addTo(map)
+
+    if (!markersByType[activity.type]) markersByType[activity.type] = []
+    markersByType[activity.type].push(marker)
+  })
+
+  // ── Filtres ───────────────────────────────────────────────────────────────
+  document.querySelectorAll('.map-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      const type = btn.dataset.type
+      Object.entries(markersByType).forEach(([t, markers]) => {
+        const show = type === 'all' || t === type
+        markers.forEach(m => {
+          m.setIcon(makeIcon(t, show))
+          if (!show) m.closePopup()
+        })
+      })
+    })
+  })
+</script>
+
+<style>
+  /* La page carte est full-screen, sans scroll */
+  .map-page {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .map-container {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Contrôles flottants ────────────────────────────────────────────── */
+  .map-controls {
+    position: absolute;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    pointer-events: none;
+  }
+
+  .map-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    pointer-events: all;
+    background: rgba(232, 228, 221, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(216, 210, 200, 0.8);
+    border-radius: 100px;
+    padding: 0.4rem;
+    box-shadow: 0 8px 32px rgba(22,26,29,0.18);
+  }
+
+  .map-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    border: none;
+    background: transparent;
+    color: var(--color-basalt-soft);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .map-filter-btn.active {
+    background: var(--color-basalt);
+    color: var(--color-stone);
+  }
+
+  .mfb-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dot, var(--color-basalt-faint));
+    flex-shrink: 0;
+  }
+
+  /* ── Légende ────────────────────────────────────────────────────────── */
+  .map-legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: rgba(232, 228, 221, 0.85);
+    backdrop-filter: blur(8px);
+    border-radius: 100px;
+    padding: 0.4rem 1.25rem;
+    pointer-events: none;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-basalt-soft);
+    letter-spacing: 0.04em;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Popup Leaflet custom ───────────────────────────────────────────── */
+  :global(.custom-popup .leaflet-popup-content-wrapper) {
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(22,26,29,0.35);
+    border: 1px solid rgba(216,210,200,0.5);
+  }
+
+  :global(.custom-popup .leaflet-popup-content) {
+    margin: 0;
+    width: 300px !important;
+  }
+
+  :global(.custom-popup .leaflet-popup-tip-container) {
+    display: none;
+  }
+
+  :global(.popup-inner) {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    display: flex;
+    gap: 0;
+    background: #EFEAE3;
+  }
+
+  :global(.popup-photo) {
+    width: 88px;
+    height: 88px;
+    flex-shrink: 0;
+    object-fit: cover;
+    display: block;
+  }
+
+  :global(.popup-body) {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  :global(.popup-type) {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7A8A92;
+  }
+
+  :global(.popup-title) {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #161A1D;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :global(.popup-day) {
+    font-size: 11px;
+    color: #1E4A6B;
+    font-weight: 500;
+  }
+
+  :global(.popup-link) {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1E4A6B;
+    letter-spacing: 0.03em;
+    margin-top: auto;
+    padding-top: 0.35rem;
+    transition: color 0.2s;
+  }
+
+  :global(.popup-link:hover) { color: #E06B2C; }
+
+  :global(.popup-link:hover) { color: #3A7599; }
+
+  /* ── Responsive ─────────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .map-controls { top: 4.5rem; width: 100%; padding-inline: 1rem; }
+    .map-filters { border-radius: 16px; padding: 0.5rem; }
+    .map-legend { display: none; }
+  }
+</style>

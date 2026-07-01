@@ -1,0 +1,750 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { activities } from '../data/activities'
+import { planningDays } from '../data/planning'
+import { dayLabels } from '../data/trip'
+
+const base = import.meta.env.BASE_URL
+
+const typeLabels: Record<string, string> = {
+  surf: 'Surf',
+  rando: 'Randonnée',
+  restaurant: 'Restaurant',
+  viewpoint: 'Point de vue',
+  swim: 'Baignade',
+  other: 'Autre',
+}
+
+const typeIcons: Record<string, string> = {
+  surf: '🏄',
+  rando: '🥾',
+  restaurant: '🍽',
+  viewpoint: '🔭',
+  swim: '🏊',
+  other: '📍',
+}
+
+const typeColors: Record<string, string> = {
+  surf: '#1E4A6B',
+  rando: '#3B6B45',
+  restaurant: '#E06B2C',
+  viewpoint: '#7FA8BE',
+  swim: '#3A7599',
+  other: '#7A8A92',
+}
+
+const allTypes = [...new Set(activities.map(a => a.type))]
+---
+
+<BaseLayout title="Accueil">
+  <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content shell">
+      <p class="hero-eyebrow">25 juillet — 1er août 2026 · 8 jours</p>
+      <h1 class="hero-title"><em>Madère</em></h1>
+      <div class="hero-cta">
+        <a href={`${base}planning/`} class="btn btn-primary">Voir le planning</a>
+        <a href={`${base}map/`} class="btn btn-ghost btn-ghost--light">Explorer la carte</a>
+      </div>
+    </div>
+    <div class="hero-scroll-hint" aria-hidden="true">
+      <span>Défiler</span>
+      <svg width="16" height="24" viewBox="0 0 16 24" fill="none">
+        <rect x="6.5" y="1" width="3" height="3" rx="1.5" fill="currentColor"/>
+        <line x1="8" y1="6" x2="8" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <polyline points="4,18 8,22 12,18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ── Activités ─────────────────────────────────────────────────────────── -->
+  <section class="activities-home">
+    <div class="shell">
+      <div class="section-header">
+        <h2 class="section-title">Activités</h2>
+        <!-- Filtres -->
+        <div class="filters" role="group" aria-label="Filtrer par type">
+          <button class="filter-btn active" data-filter="all">Tout</button>
+          {allTypes.map(type => (
+            <button class="filter-btn" data-filter={type}>
+              {typeIcons[type]} {typeLabels[type]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p class="flip-hint" aria-hidden="true">Clique sur une carte pour en savoir plus</p>
+
+      <!-- Mosaïque flip cards -->
+      <div class="mosaic-grid" id="mosaic-grid">
+        {activities.map((activity) => (
+          <div
+            class="flip-card"
+            data-type={activity.type}
+            tabindex="0"
+            role="button"
+            aria-label={`${activity.name} — cliquer pour les détails`}
+          >
+            <div class="flip-card-inner">
+              <!-- RECTO -->
+              <div class="flip-card-front" aria-hidden="false">
+                <div class="fcc-photo">
+                  <img
+                    src={activity.photos[0]}
+                    alt={activity.name}
+                    loading="lazy"
+                  />
+                  <div class="fcc-photo-overlay"></div>
+                  <span class="fcc-type-chip" style={`background: ${typeColors[activity.type] ?? '#7A8A92'}`}>
+                    {typeIcons[activity.type]} {typeLabels[activity.type]}
+                  </span>
+                </div>
+                <div class="fcc-body">
+                  <h3 class="fcc-name">{activity.name}</h3>
+                  {activity.duration && (
+                    <p class="fcc-meta">⏱ {activity.duration}</p>
+                  )}
+                </div>
+              </div>
+
+              <!-- VERSO -->
+              <div class="flip-card-back" aria-hidden="true">
+                <div class="fcb-inner">
+                  <p class="fcb-type" style={`color: ${typeColors[activity.type] ?? '#7A8A92'}`}>
+                    {typeIcons[activity.type]} {typeLabels[activity.type]}
+                  </p>
+                  <h3 class="fcb-name">{activity.name}</h3>
+                  <p class="fcb-desc">{activity.shortDescription}</p>
+                  <div class="fcb-infos">
+                    {activity.day && (
+                      <span class="fcb-day">📅 {dayLabels[activity.day].long}</span>
+                    )}
+                    {activity.duration && (
+                      <span class="fcb-info-item">⏱ {activity.duration}</span>
+                    )}
+                    {activity.difficulty && (
+                      <span class={`fcb-diff diff-${activity.difficulty}`}>
+                        {activity.difficulty === 'easy' ? 'Facile' : activity.difficulty === 'medium' ? 'Intermédiaire' : 'Difficile'}
+                      </span>
+                    )}
+                  </div>
+                  <a
+                    href={`${base}activities/${activity.slug}/`}
+                    class="fcb-link"
+                  >
+                    Voir la fiche complète →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p class="no-results" id="no-results" hidden>Aucune activité dans cette catégorie.</p>
+
+      <div class="activities-footer">
+        <a href={`${base}activities/`} class="btn btn-ghost">Toutes les activités →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Planning preview ───────────────────────────────────────────────────── -->
+  <section class="planning-preview">
+    <div class="shell">
+      <div class="section-header">
+        <h2 class="section-title">Le programme</h2>
+      </div>
+      <div class="days-preview">
+        {planningDays.slice(0, 4).map((day) => (
+          <div class="day-row">
+            <div class="day-num">
+              <span>J{day.day}</span>
+            </div>
+            <div class="day-info">
+              <p class="day-date">{new Date(day.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })}</p>
+              <p class="day-title-text">{day.title}</p>
+            </div>
+            <div class="day-acts">
+              {day.activities.length > 0
+                ? day.activities.map(a => {
+                    const act = activities.find(x => x.slug === a.activitySlug)
+                    return act ? <span class="day-tag">{act.name}</span> : null
+                  })
+                : <span class="day-free">Journée libre</span>
+              }
+            </div>
+          </div>
+        ))}
+        <div class="days-more">
+          <a href={`${base}planning/`} class="btn btn-primary">Planning complet →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Map preview ────────────────────────────────────────────────────────── -->
+  <section class="map-preview">
+    <div class="shell map-preview-inner">
+      <div class="map-preview-text">
+        <h2 class="section-title">Tous les spots<br />sur la carte</h2>
+        <p class="map-preview-desc">Chaque activité géolocalisée, filtrée par type, avec les infos clés au clic.</p>
+        <a href={`${base}map/`} class="btn btn-primary">Ouvrir la carte</a>
+      </div>
+      <a href={`${base}map/`} class="map-preview-thumb" aria-label="Voir la carte interactive">
+        <img
+          src="https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&q=80"
+          alt="Aperçu carte Madère"
+          loading="lazy"
+        />
+        <div class="map-preview-overlay">
+          <span>Explorer →</span>
+        </div>
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // ── Filtres ───────────────────────────────────────────────────────────────
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn')
+  const cards = document.querySelectorAll<HTMLElement>('.flip-card')
+  const noResults = document.getElementById('no-results')
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      const filter = btn.dataset.filter ?? 'all'
+      let visible = 0
+      cards.forEach(card => {
+        const show = filter === 'all' || card.dataset.type === filter
+        card.style.display = show ? '' : 'none'
+        if (show) visible++
+        if (!show && card.classList.contains('is-flipped')) {
+          card.classList.remove('is-flipped')
+        }
+      })
+      if (noResults) noResults.hidden = visible > 0
+    })
+  })
+
+  // ── Flip cards ────────────────────────────────────────────────────────────
+  cards.forEach(card => {
+    const flip = () => card.classList.toggle('is-flipped')
+
+    card.addEventListener('click', e => {
+      const target = e.target as HTMLElement
+      if (target.closest('a')) return  // laisser les liens naviguer
+      flip()
+    })
+
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        flip()
+      }
+      if (e.key === 'Escape') card.classList.remove('is-flipped')
+    })
+  })
+
+</script>
+
+<style>
+  /* ── Hero ──────────────────────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 6rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 65% 30%, rgba(22, 26, 29, 0) 30%, rgba(22, 26, 29, 0.4) 100%),
+      linear-gradient(
+        160deg,
+        #0D2A3D 0%,
+        #1E4A6B 30%,
+        #3A7599 65%,
+        #7FA8BE 85%,
+        #B8C8D4 100%
+      );
+  }
+
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    top: 18%;
+    left: 60%;
+    width: 340px;
+    height: 340px;
+    background: radial-gradient(circle, rgba(224, 107, 44, 0.22) 0%, rgba(58, 117, 153, 0.1) 40%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    padding-top: 8rem;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(232, 228, 221, 0.65);
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(96px, 17vw, 200px);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    color: var(--color-stone);
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-title em {
+    font-style: italic;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-ghost--light {
+    border-color: rgba(232, 228, 221, 0.35);
+    color: var(--color-stone);
+  }
+
+  .btn-ghost--light:hover {
+    border-color: var(--color-stone);
+    background: rgba(232, 228, 221, 0.1);
+    color: var(--color-stone);
+  }
+
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(232, 228, 221, 0.45);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ── Section header ─────────────────────────────────────────────────────── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--color-basalt);
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .flip-hint {
+    font-size: 12px;
+    color: var(--color-basalt-faint);
+    font-style: italic;
+    margin-bottom: 1.75rem;
+  }
+
+  /* ── Activités section ──────────────────────────────────────────────────── */
+  .activities-home {
+    padding-block: 5rem 4rem;
+  }
+
+  /* ── Mosaïque ───────────────────────────────────────────────────────────── */
+  .mosaic-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.1rem;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-basalt-faint);
+    font-style: italic;
+  }
+
+  .activities-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  /* ── Flip card ──────────────────────────────────────────────────────────── */
+  .flip-card {
+    perspective: 1000px;
+    cursor: pointer;
+    height: 280px;
+    outline: none;
+  }
+
+  .flip-card:focus-visible {
+    border-radius: var(--radius-card);
+    outline: 2px solid var(--color-ocean);
+    outline-offset: 3px;
+  }
+
+  .flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--radius-card);
+  }
+
+  .flip-card.is-flipped .flip-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .flip-card-front,
+  .flip-card-back {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: var(--shadow-card);
+  }
+
+  .flip-card-back {
+    transform: rotateY(180deg);
+    background: var(--color-stone-card);
+  }
+
+  /* Recto */
+  .fcc-photo {
+    position: relative;
+    height: 68%;
+    overflow: hidden;
+  }
+
+  .fcc-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .flip-card:not(.is-flipped):hover .fcc-photo img {
+    transform: scale(1.05);
+  }
+
+  .fcc-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(22,26,29,0.45) 0%, transparent 55%);
+  }
+
+  .fcc-type-chip {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.7rem;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 100px;
+  }
+
+  .fcc-body {
+    background: var(--color-stone-card);
+    padding: 0.9rem 1rem;
+    height: 32%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .fcc-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-basalt);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fcc-meta {
+    font-size: 11px;
+    color: var(--color-basalt-faint);
+  }
+
+  /* Verso */
+  .fcb-inner {
+    height: 100%;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: 1px solid var(--color-stone-deep);
+    border-radius: var(--radius-card);
+  }
+
+  .fcb-type {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .fcb-name {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--color-basalt);
+    line-height: 1.15;
+  }
+
+  .fcb-desc {
+    font-size: 12.5px;
+    color: var(--color-basalt-soft);
+    line-height: 1.55;
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .fcb-infos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: auto;
+  }
+
+  .fcb-info-item {
+    font-size: 11px;
+    color: var(--color-basalt-faint);
+  }
+
+  .fcb-day {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-ocean);
+    width: 100%;
+  }
+
+  .fcb-diff {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 100px;
+  }
+
+  .diff-easy   { background: rgba(59,107,69,.12); color: var(--color-laurel); }
+  .diff-medium { background: rgba(30,74,107,.12); color: var(--color-ocean); }
+  .diff-hard   { background: rgba(224,107,44,.12); color: var(--color-paradise); }
+
+  .fcb-link {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ocean);
+    letter-spacing: 0.03em;
+    margin-top: 0.25rem;
+    transition: color 0.2s;
+  }
+
+  .fcb-link:hover { color: var(--color-paradise); }
+
+  /* ── Planning preview ───────────────────────────────────────────────────── */
+  .planning-preview {
+    padding-block: 5rem;
+    background: var(--color-stone-card);
+  }
+
+  .days-preview {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-stone-deep);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+
+  .day-row {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-stone-card);
+    border-bottom: 1px solid var(--color-stone-deep);
+    transition: background 0.2s;
+  }
+
+  .day-row:last-of-type { border-bottom: none; }
+  .day-row:hover { background: var(--color-stone); }
+
+  .day-num {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--color-ocean);
+    text-align: center;
+  }
+
+  .day-date {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-basalt-faint);
+    margin-bottom: 0.2rem;
+  }
+
+  .day-title-text {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-basalt);
+  }
+
+  .day-acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .day-tag {
+    font-size: 12px;
+    padding: 0.25rem 0.75rem;
+    background: var(--color-ocean);
+    color: var(--color-stone);
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .day-free {
+    font-size: 12px;
+    color: var(--color-basalt-faint);
+    font-style: italic;
+  }
+
+  .days-more {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+    background: var(--color-stone-card);
+  }
+
+  /* ── Map preview ────────────────────────────────────────────────────────── */
+  .map-preview {
+    padding-block: 5rem;
+  }
+
+  .map-preview-inner {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .map-preview-desc {
+    color: var(--color-basalt-soft);
+    margin-block: 1rem 2rem;
+  }
+
+  .map-preview-thumb {
+    position: relative;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    display: block;
+    aspect-ratio: 8/5;
+  }
+
+  .map-preview-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .map-preview-thumb:hover img { transform: scale(1.03); }
+
+  .map-preview-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 26, 29, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-style: italic;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .map-preview-thumb:hover .map-preview-overlay { opacity: 1; }
+
+  /* ── Responsive ─────────────────────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .mosaic-grid { grid-template-columns: repeat(3, 1fr); }
+    .flip-card { height: 260px; }
+  }
+
+  @media (max-width: 768px) {
+    .section-header { flex-direction: column; align-items: flex-start; }
+    .mosaic-grid { grid-template-columns: repeat(2, 1fr); }
+    .map-preview-inner { grid-template-columns: 1fr; }
+    .map-preview-thumb { order: -1; }
+    .day-row { grid-template-columns: 3rem 1fr; }
+    .day-acts { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .mosaic-grid { grid-template-columns: 1fr 1fr; }
+    .flip-card { height: 240px; }
+    .hero { padding-bottom: 4rem; }
+    .activities-home, .planning-preview, .map-preview { padding-block: 3.5rem; }
+  }
+</style>

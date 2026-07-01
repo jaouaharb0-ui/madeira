@@ -1,0 +1,235 @@
+---
+import '../styles/globals.css'
+
+interface Props {
+  title: string
+  description?: string
+}
+
+const { title, description = 'Notre voyage à Madère — 25 juillet au 1er août 2026' } = Astro.props
+const base = import.meta.env.BASE_URL
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <title>{title} · Madère 2026</title>
+  </head>
+  <body>
+    <nav class="site-nav" id="nav">
+      <div class="shell nav-inner">
+        <a href={base} class="nav-logo">
+          <span class="nav-logo-main">Madère</span>
+          <span class="nav-logo-sub">25 juil — 1er août</span>
+        </a>
+        <ul class="nav-links" role="list">
+          <li><a href={`${base}activities/`} class="nav-link">Activités</a></li>
+          <li><a href={`${base}map/`} class="nav-link">Carte</a></li>
+          <li><a href={`${base}planning/`} class="nav-link">Planning</a></li>
+        </ul>
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="nav-mobile" id="nav-mobile" hidden>
+        <a href={`${base}activities/`}>Activités</a>
+        <a href={`${base}map/`}>Carte</a>
+        <a href={`${base}planning/`}>Planning</a>
+      </div>
+    </nav>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <span class="footer-logo">Madère 2026</span>
+        <span class="footer-credit">Fait avec ♥ pour notre voyage</span>
+      </div>
+    </footer>
+
+    <script>
+      // Nav scroll effect
+      const nav = document.getElementById('nav')
+      window.addEventListener('scroll', () => {
+        nav?.classList.toggle('scrolled', window.scrollY > 40)
+      }, { passive: true })
+
+      // Mobile menu
+      const toggle = document.querySelector('.nav-toggle') as HTMLButtonElement
+      const mobile = document.getElementById('nav-mobile')
+      toggle?.addEventListener('click', () => {
+        const open = toggle.getAttribute('aria-expanded') === 'true'
+        toggle.setAttribute('aria-expanded', String(!open))
+        if (mobile) mobile.hidden = open
+      })
+
+      // Active nav link
+      const links = document.querySelectorAll('.nav-link, .nav-mobile a')
+      links.forEach(link => {
+        if (link.getAttribute('href') === window.location.pathname) {
+          link.classList.add('active')
+        }
+      })
+    </script>
+  </body>
+</html>
+
+<style>
+  .site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .site-nav.scrolled {
+    background: rgba(232, 228, 221, 0.92);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 rgba(22, 26, 29, 0.08);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.25rem;
+  }
+
+  .nav-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 1;
+  }
+
+  .nav-logo-main {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--color-basalt);
+    letter-spacing: -0.02em;
+  }
+
+  .nav-logo-sub {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--color-basalt-faint);
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-basalt-soft);
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: var(--color-paradise);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--color-basalt);
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    transform: scaleX(1);
+  }
+
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  .nav-toggle span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--color-basalt);
+    transition: all 0.2s ease;
+  }
+
+  .nav-mobile {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-stone);
+    border-top: 1px solid var(--color-stone-deep);
+    padding: 1rem var(--spacing-gutter);
+    gap: 1rem;
+  }
+
+  .nav-mobile a {
+    font-size: 18px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-basalt);
+  }
+
+  .site-footer {
+    padding-block: 3rem;
+    border-top: 1px solid var(--color-stone-deep);
+    margin-top: 6rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-basalt-soft);
+  }
+
+  .footer-credit {
+    font-size: 13px;
+    color: var(--color-basalt-faint);
+  }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+  }
+</style>

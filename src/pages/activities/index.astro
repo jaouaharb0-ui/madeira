@@ -1,0 +1,215 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { activities } from '../../data/activities'
+
+const base = import.meta.env.BASE_URL
+
+const typeLabels: Record<string, string> = {
+  surf: 'Surf',
+  rando: 'Randonnée',
+  restaurant: 'Restaurant',
+  viewpoint: 'Point de vue',
+  swim: 'Baignade',
+  other: 'Autre',
+}
+
+const typeIcons: Record<string, string> = {
+  surf: '🏄',
+  rando: '🥾',
+  restaurant: '🍽',
+  viewpoint: '🔭',
+  swim: '🏊',
+  other: '📍',
+}
+
+const allTypes = [...new Set(activities.map(a => a.type))]
+---
+
+<BaseLayout title="Activités" description="Toutes les activités planifiées pour notre voyage à Madère.">
+  <div class="page-hero">
+    <div class="shell page-hero-inner">
+      <p class="eyebrow">Notre programme</p>
+      <h1 class="page-title">Les activités</h1>
+      <p class="page-sub">{activities.length} expériences sélectionnées — surf, randonnée, restos et points de vue.</p>
+    </div>
+  </div>
+
+  <section class="activities-section">
+    <div class="shell">
+      <!-- Filtres -->
+      <div class="filters" role="group" aria-label="Filtrer par type">
+        <button class="filter-btn active" data-filter="all">Tout voir</button>
+        {allTypes.map(type => (
+          <button class="filter-btn" data-filter={type}>
+            {typeIcons[type]} {typeLabels[type]}
+          </button>
+        ))}
+      </div>
+
+      <!-- Grille -->
+      <div class="activities-grid" id="activities-grid">
+        {activities.map(activity => (
+          <a
+            href={`${base}activities/${activity.slug}`}
+            class="activity-card"
+            data-type={activity.type}
+          >
+            <div class="card-accent"></div>
+            <div class="card-photo">
+              <img
+                src={activity.photos[0]}
+                alt={activity.name}
+                loading="lazy"
+              />
+              <div class="card-photo-overlay"></div>
+              <span class="card-type-chip">
+                {typeIcons[activity.type]} {typeLabels[activity.type]}
+              </span>
+            </div>
+            <div class="card-body">
+              <h2 class="card-title">{activity.name}</h2>
+              <p class="card-desc">{activity.shortDescription}</p>
+              <div class="card-footer">
+                {activity.duration && (
+                  <span class="card-info">⏱ {activity.duration}</span>
+                )}
+                {activity.difficulty && (
+                  <span class={`card-difficulty diff-${activity.difficulty}`}>
+                    {activity.difficulty === 'easy' ? 'Facile' : activity.difficulty === 'medium' ? 'Moyen' : 'Difficile'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <p class="no-results" id="no-results" hidden>
+        Aucune activité dans cette catégorie pour l'instant.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn')
+  const cards = document.querySelectorAll<HTMLElement>('[data-type]')
+  const noResults = document.getElementById('no-results')
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+
+      const filter = btn.dataset.filter ?? 'all'
+      let visible = 0
+
+      cards.forEach(card => {
+        const show = filter === 'all' || card.dataset.type === filter
+        card.style.display = show ? '' : 'none'
+        if (show) visible++
+      })
+
+      if (noResults) noResults.hidden = visible > 0
+    })
+  })
+</script>
+
+<style>
+  .page-hero {
+    padding-top: 9rem;
+    padding-bottom: 4rem;
+    background: linear-gradient(180deg, var(--color-stone-deep) 0%, var(--color-stone) 100%);
+    border-bottom: 1px solid var(--color-stone-deep);
+  }
+
+  .page-hero-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .page-title {
+    font-size: clamp(3rem, 7vw, 6rem);
+    color: var(--color-basalt);
+    line-height: 1;
+  }
+
+  .page-sub {
+    color: var(--color-basalt-soft);
+    font-size: 1.05rem;
+    max-width: 480px;
+  }
+
+  .activities-section {
+    padding-block: 4rem 6rem;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .activities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+
+  .card-type-chip {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(22, 26, 29, 0.65);
+    backdrop-filter: blur(8px);
+    color: var(--color-stone);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-stone-deep);
+  }
+
+  .card-info {
+    font-size: 12px;
+    color: var(--color-basalt-faint);
+  }
+
+  .card-difficulty {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+  }
+
+  .diff-easy { background: rgba(59, 107, 69, 0.12); color: var(--color-laurel); }
+  .diff-medium { background: rgba(30, 74, 107, 0.12); color: var(--color-ocean); }
+  .diff-hard { background: rgba(224, 107, 44, 0.12); color: var(--color-paradise); }
+
+  .no-results {
+    text-align: center;
+    padding: 4rem;
+    color: var(--color-basalt-faint);
+    font-style: italic;
+  }
+
+  @media (max-width: 900px) {
+    .activities-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 560px) {
+    .activities-grid { grid-template-columns: 1fr; }
+  }
+</style>

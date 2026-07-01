@@ -1,0 +1,566 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { activities, getActivity } from '../../data/activities'
+import type { Activity } from '../../data/activities'
+import { dayLabels } from '../../data/trip'
+
+export function getStaticPaths() {
+  return activities.map(a => ({ params: { slug: a.slug } }))
+}
+
+const { slug } = Astro.params
+const activity = getActivity(slug)
+
+if (!activity) return Astro.redirect('/madeira/activities')
+
+const base = import.meta.env.BASE_URL
+
+const typeLabels: Record<string, string> = {
+  surf: 'Surf',
+  rando: 'Randonnée',
+  restaurant: 'Restaurant',
+  viewpoint: 'Point de vue',
+  swim: 'Baignade',
+  other: 'Autre',
+}
+
+const difficultyLabels: Record<string, string> = {
+  easy: 'Facile',
+  medium: 'Intermédiaire',
+  hard: 'Difficile',
+}
+
+const similar = activities.filter(a => a.type === activity.type && a.slug !== activity.slug).slice(0, 2)
+
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${activity.coordinates.lat},${activity.coordinates.lng}`
+---
+
+<BaseLayout title={activity.name} description={activity.shortDescription}>
+  <!-- ── Breadcrumb ──────────────────────────────────────────────────────── -->
+  <nav class="breadcrumb shell" aria-label="Fil d'Ariane">
+    <a href={base}>Accueil</a>
+    <span aria-hidden="true">›</span>
+    <a href={`${base}activities`}>Activités</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{activity.name}</span>
+  </nav>
+
+  <!-- ── Hero photo ─────────────────────────────────────────────────────── -->
+  <section class="detail-hero">
+    <img
+      src={activity.photos[0]}
+      alt={activity.name}
+      class="detail-hero-img"
+    />
+    <div class="detail-hero-overlay"></div>
+    <div class="detail-hero-content shell">
+      <p class="eyebrow-light">{typeLabels[activity.type]}</p>
+      <h1 class="detail-title">{activity.name}</h1>
+      <p class="detail-sub">{activity.shortDescription}</p>
+    </div>
+  </section>
+
+  <!-- ── Corps principal ───────────────────────────────────────────────── -->
+  <div class="detail-body shell">
+    <div class="detail-main">
+      <!-- Description longue -->
+      <div class="detail-description">
+        {activity.longDescription.split('\n\n').map(para => (
+          <p>{para}</p>
+        ))}
+      </div>
+
+      <!-- Galerie photos -->
+      {activity.photos.length > 1 && (
+        <div class="gallery-section">
+          <h2 class="detail-section-title">Photos</h2>
+          <div class="gallery-grid" id="gallery">
+            {activity.photos.map((photo, i) => (
+              <button
+                class="gallery-thumb"
+                data-src={photo}
+                data-index={i}
+                aria-label={`Photo ${i + 1}`}
+              >
+                <img src={photo} alt={`${activity.name} — photo ${i + 1}`} loading="lazy" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Activités similaires -->
+      {similar.length > 0 && (
+        <div class="similar-section">
+          <h2 class="detail-section-title">Dans le même style</h2>
+          <div class="similar-grid">
+            {similar.map(a => (
+              <a href={`${base}activities/${a.slug}`} class="activity-card">
+                <div class="card-accent"></div>
+                <div class="card-photo">
+                  <img src={a.photos[0]} alt={a.name} loading="lazy" />
+                  <div class="card-photo-overlay"></div>
+                </div>
+                <div class="card-body">
+                  <h3 class="card-title">{a.name}</h3>
+                  <p class="card-desc">{a.shortDescription}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+
+    <!-- ── Sidebar infos pratiques ──────────────────────────────────────── -->
+    <aside class="detail-sidebar">
+      <div class="info-card">
+        <h2 class="info-card-title">Infos pratiques</h2>
+        <dl class="info-list">
+          {activity.duration && (
+            <>
+              <dt>Durée</dt>
+              <dd>{activity.duration}</dd>
+            </>
+          )}
+          {activity.difficulty && (
+            <>
+              <dt>Niveau</dt>
+              <dd class={`diff-badge diff-${activity.difficulty}`}>
+                {difficultyLabels[activity.difficulty]}
+              </dd>
+            </>
+          )}
+          {activity.bestTime && (
+            <>
+              <dt>Meilleur moment</dt>
+              <dd>{activity.bestTime}</dd>
+            </>
+          )}
+          {activity.estimatedCost && (
+            <>
+              <dt>Budget estimé</dt>
+              <dd>{activity.estimatedCost}</dd>
+            </>
+          )}
+          {activity.day && (
+            <>
+              <dt>Jour prévu</dt>
+              <dd class="day-badge">{dayLabels[activity.day].long}</dd>
+            </>
+          )}
+          {activity.address && (
+            <>
+              <dt>Adresse</dt>
+              <dd>{activity.address}</dd>
+            </>
+          )}
+        </dl>
+      </div>
+
+      <!-- Mini-carte -->
+      <div class="mini-map-card">
+        <h2 class="info-card-title">Localisation</h2>
+        <div
+          class="mini-map"
+          id="mini-map"
+          data-lat={activity.coordinates.lat}
+          data-lng={activity.coordinates.lng}
+          data-name={activity.name}
+        ></div>
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-ghost maps-btn"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Ouvrir dans Google Maps
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ── Lightbox ───────────────────────────────────────────────────────── -->
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Galerie photos">
+    <button class="lightbox-close" id="lb-close" aria-label="Fermer">&times;</button>
+    <button class="lightbox-prev" id="lb-prev" aria-label="Photo précédente">‹</button>
+    <button class="lightbox-next" id="lb-next" aria-label="Photo suivante">›</button>
+    <div class="lightbox-img-wrap">
+      <img src="" alt="" id="lb-img" />
+    </div>
+    <p class="lightbox-counter" id="lb-counter"></p>
+  </div>
+</BaseLayout>
+
+<!-- Leaflet pour la mini-carte -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script>
+  import L from 'leaflet'
+
+  // ── Mini-carte ──────────────────────────────────────────────────────────
+  const mapEl = document.getElementById('mini-map') as HTMLElement | null
+  if (mapEl) {
+    const lat = parseFloat(mapEl.dataset.lat ?? '32.65')
+    const lng = parseFloat(mapEl.dataset.lng ?? '-16.9')
+    const name = mapEl.dataset.name ?? ''
+
+    const map = L.map(mapEl, { zoomControl: false, scrollWheelZoom: false }).setView([lat, lng], 13)
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+    }).addTo(map)
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        width:14px;height:14px;
+        background:#1E4A6B;
+        border:3px solid #E8E4DD;
+        border-radius:50%;
+        box-shadow:0 2px 8px rgba(22,26,29,.4)
+      "></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+    })
+
+    L.marker([lat, lng], { icon }).addTo(map).bindPopup(name).openPopup()
+  }
+
+  // ── Lightbox ────────────────────────────────────────────────────────────
+  const thumbs = document.querySelectorAll<HTMLButtonElement>('.gallery-thumb')
+  const lightbox = document.getElementById('lightbox') as HTMLElement | null
+  const lbImg = document.getElementById('lb-img') as HTMLImageElement | null
+  const lbCounter = document.getElementById('lb-counter')
+  const lbClose = document.getElementById('lb-close')
+  const lbPrev = document.getElementById('lb-prev')
+  const lbNext = document.getElementById('lb-next')
+
+  const photos = [...thumbs].map(t => t.dataset.src ?? '')
+  let current = 0
+
+  function openLightbox(index: number) {
+    current = index
+    if (!lightbox || !lbImg || !lbCounter) return
+    lightbox.hidden = false
+    document.body.style.overflow = 'hidden'
+    lbImg.src = photos[current] ?? ''
+    lbCounter.textContent = `${current + 1} / ${photos.length}`
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return
+    lightbox.hidden = true
+    document.body.style.overflow = ''
+  }
+
+  function prev() { openLightbox((current - 1 + photos.length) % photos.length) }
+  function next() { openLightbox((current + 1) % photos.length) }
+
+  thumbs.forEach((btn, i) => btn.addEventListener('click', () => openLightbox(i)))
+  lbClose?.addEventListener('click', closeLightbox)
+  lbPrev?.addEventListener('click', prev)
+  lbNext?.addEventListener('click', next)
+  lightbox?.addEventListener('click', e => { if (e.target === lightbox) closeLightbox() })
+
+  document.addEventListener('keydown', e => {
+    if (!lightbox || lightbox.hidden) return
+    if (e.key === 'Escape') closeLightbox()
+    if (e.key === 'ArrowLeft') prev()
+    if (e.key === 'ArrowRight') next()
+  })
+</script>
+
+<style>
+  /* ── Breadcrumb ─────────────────────────────────────────────────────── */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 6.5rem;
+    padding-bottom: 0;
+    font-size: 13px;
+    color: var(--color-basalt-faint);
+  }
+
+  .breadcrumb a {
+    color: var(--color-basalt-soft);
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover { color: var(--color-ocean); }
+
+  /* ── Hero photo ─────────────────────────────────────────────────────── */
+  .detail-hero {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+
+  .detail-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .detail-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(22,26,29,0.75) 0%, rgba(22,26,29,0.1) 60%);
+  }
+
+  .detail-hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: 3rem;
+  }
+
+  .eyebrow-light {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(232, 228, 221, 0.65);
+    margin-bottom: 0.75rem;
+  }
+
+  .eyebrow-light::before {
+    content: '— ';
+    color: var(--color-paradise);
+  }
+
+  .detail-title {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    color: var(--color-stone);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .detail-sub {
+    font-size: 1.1rem;
+    color: rgba(232, 228, 221, 0.8);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* ── Corps ──────────────────────────────────────────────────────────── */
+  .detail-body {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 4rem;
+    padding-block: 4rem 6rem;
+    align-items: start;
+  }
+
+  .detail-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+  }
+
+  .detail-description {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    color: var(--color-basalt-soft);
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+
+  .detail-section-title {
+    font-size: 1.5rem;
+    color: var(--color-basalt);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── Galerie ────────────────────────────────────────────────────────── */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .gallery-thumb {
+    border: none;
+    padding: 0;
+    background: none;
+    cursor: zoom-in;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+  }
+
+  .gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .gallery-thumb:hover img { transform: scale(1.06); }
+
+  /* ── Sidebar ────────────────────────────────────────────────────────── */
+  .detail-sidebar {
+    position: sticky;
+    top: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .info-card, .mini-map-card {
+    background: var(--color-stone-card);
+    border: 1px solid var(--color-stone-deep);
+    border-radius: 16px;
+    padding: 1.75rem;
+  }
+
+  .info-card-title {
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-basalt-faint);
+    margin-bottom: 1.25rem;
+  }
+
+  .info-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem 1.25rem;
+    font-size: 14px;
+  }
+
+  .info-list dt {
+    color: var(--color-basalt-faint);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .info-list dd {
+    color: var(--color-basalt-soft);
+    margin: 0;
+  }
+
+  .diff-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .diff-easy { background: rgba(59,107,69,0.12); color: var(--color-laurel); }
+  .diff-medium { background: rgba(30,74,107,0.12); color: var(--color-ocean); }
+  .diff-hard { background: rgba(224,107,44,0.12); color: var(--color-paradise); }
+
+  .day-badge {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-ocean);
+  }
+
+  .mini-map {
+    height: 200px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-stone-deep);
+  }
+
+  .maps-btn {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  /* ── Activités similaires ───────────────────────────────────────────── */
+  .similar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  /* ── Lightbox ───────────────────────────────────────────────────────── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(22, 26, 29, 0.95);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox[hidden] { display: none; }
+
+  .lightbox-img-wrap {
+    max-width: 90vw;
+    max-height: 85vh;
+  }
+
+  .lightbox-img-wrap img {
+    max-width: 100%;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .lightbox-close, .lightbox-prev, .lightbox-next {
+    position: absolute;
+    background: rgba(232,228,221,0.1);
+    border: 1px solid rgba(232,228,221,0.2);
+    color: var(--color-stone);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover {
+    background: rgba(232,228,221,0.2);
+  }
+
+  .lightbox-close { top: 1.5rem; right: 1.5rem; font-size: 1.75rem; }
+  .lightbox-prev { left: 1.5rem; top: 50%; transform: translateY(-50%); }
+  .lightbox-next { right: 1.5rem; top: 50%; transform: translateY(-50%); }
+
+  .lightbox-counter {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(232,228,221,0.5);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .detail-body { grid-template-columns: 1fr; }
+    .detail-sidebar { position: static; }
+  }
+
+  @media (max-width: 640px) {
+    .detail-hero { height: 50vh; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .similar-grid { grid-template-columns: 1fr; }
+    .lightbox-prev { left: 0.5rem; }
+    .lightbox-next { right: 0.5rem; }
+  }
+</style>

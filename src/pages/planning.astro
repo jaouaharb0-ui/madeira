@@ -1,0 +1,394 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { activities } from '../data/activities'
+import { orderedDays, dayLabels } from '../data/trip'
+
+const base = import.meta.env.BASE_URL
+
+const typeLabels: Record<string, string> = {
+  surf: 'Surf', rando: 'Randonnée', restaurant: 'Restaurant',
+  viewpoint: 'Point de vue', swim: 'Baignade', other: 'Autre',
+}
+const typeIcons: Record<string, string> = {
+  surf: '🏄', rando: '🥾', restaurant: '🍽',
+  viewpoint: '🔭', swim: '🏊', other: '📍',
+}
+const typeColors: Record<string, string> = {
+  surf: '#1E4A6B', rando: '#3B6B45', restaurant: '#E06B2C',
+  viewpoint: '#7FA8BE', swim: '#3A7599', other: '#7A8A92',
+}
+
+// Grouper les activités par jour
+const byDay = Object.fromEntries(
+  orderedDays.map(d => [d, activities.filter(a => a.day === d)])
+)
+const unassigned = activities.filter(a => !a.day)
+const totalAssigned = activities.filter(a => a.day).length
+---
+
+<BaseLayout title="Planning" description="Notre planning jour par jour pour Madère.">
+
+  <div class="page-hero">
+    <div class="shell">
+      <p class="eyebrow">25 juillet — 1er août 2026</p>
+      <h1 class="page-title">Planning</h1>
+      <p class="page-sub">
+        {totalAssigned} activité{totalAssigned > 1 ? 's' : ''} placée{totalAssigned > 1 ? 's' : ''} sur 8 jours.
+        {unassigned.length > 0 && `${unassigned.length} encore à assigner.`}
+      </p>
+    </div>
+  </div>
+
+  <section class="planning-section">
+    <div class="shell">
+
+      <!-- ── 8 jours ─────────────────────────────────────────────────────── -->
+      {orderedDays.map((dayKey, i) => {
+        const label = dayLabels[dayKey]
+        const dayActivities = byDay[dayKey] ?? []
+        const isEmpty = dayActivities.length === 0
+
+        return (
+          <details class={`day-block ${isEmpty ? 'day-block--empty' : ''}`} open={!isEmpty}>
+            <summary class="day-summary">
+              <div class="day-summary-left">
+                <span class="day-number">J{label.dayNumber}</span>
+                <div class="day-meta">
+                  <span class="day-short">{label.short}</span>
+                  <h2 class="day-long">{label.long}</h2>
+                </div>
+              </div>
+              <div class="day-summary-right">
+                {isEmpty
+                  ? <span class="day-count day-count--empty">Libre</span>
+                  : <span class="day-count">{dayActivities.length} activité{dayActivities.length > 1 ? 's' : ''}</span>
+                }
+                <span class="day-chevron" aria-hidden="true">›</span>
+              </div>
+            </summary>
+
+            <div class="day-content">
+              {isEmpty ? (
+                <p class="day-free">Aucune activité prévue — journée libre.</p>
+              ) : (
+                <div class="day-cards">
+                  {dayActivities.map(activity => (
+                    <a href={`${base}activities/${activity.slug}/`} class="pcard">
+                      <div class="pcard-photo">
+                        <img src={activity.photos[0]} alt={activity.name} loading="lazy" />
+                      </div>
+                      <div class="pcard-body">
+                        <p class="pcard-type" style={`color:${typeColors[activity.type]}`}>
+                          {typeIcons[activity.type]} {typeLabels[activity.type]}
+                        </p>
+                        <h3 class="pcard-name">{activity.name}</h3>
+                        {activity.duration && (
+                          <p class="pcard-meta">⏱ {activity.duration}</p>
+                        )}
+                        {activity.address && (
+                          <p class="pcard-meta">📍 {activity.address}</p>
+                        )}
+                      </div>
+                      <span class="pcard-arrow" aria-hidden="true">→</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </details>
+        )
+      })}
+
+      <!-- ── Non assignées ──────────────────────────────────────────────── -->
+      {unassigned.length > 0 && (
+        <details class="day-block day-block--unassigned" open>
+          <summary class="day-summary">
+            <div class="day-summary-left">
+              <span class="day-number day-number--dot">?</span>
+              <div class="day-meta">
+                <span class="day-short">—</span>
+                <h2 class="day-long">Non assignées</h2>
+              </div>
+            </div>
+            <div class="day-summary-right">
+              <span class="day-count">{unassigned.length} activité{unassigned.length > 1 ? 's' : ''}</span>
+              <span class="day-chevron" aria-hidden="true">›</span>
+            </div>
+          </summary>
+          <div class="day-content">
+            <div class="day-cards">
+              {unassigned.map(activity => (
+                <a href={`${base}activities/${activity.slug}/`} class="pcard">
+                  <div class="pcard-photo">
+                    <img src={activity.photos[0]} alt={activity.name} loading="lazy" />
+                  </div>
+                  <div class="pcard-body">
+                    <p class="pcard-type" style={`color:${typeColors[activity.type]}`}>
+                      {typeIcons[activity.type]} {typeLabels[activity.type]}
+                    </p>
+                    <h3 class="pcard-name">{activity.name}</h3>
+                    {activity.duration && (
+                      <p class="pcard-meta">⏱ {activity.duration}</p>
+                    )}
+                  </div>
+                  <span class="pcard-arrow" aria-hidden="true">→</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </details>
+      )}
+
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  /* ── Hero ──────────────────────────────────────────────────────────────── */
+  .page-hero {
+    padding-top: 9rem;
+    padding-bottom: 4rem;
+    background: linear-gradient(180deg, var(--color-stone-deep) 0%, var(--color-stone) 100%);
+    border-bottom: 1px solid var(--color-stone-deep);
+  }
+
+  .page-title {
+    font-size: clamp(3rem, 7vw, 6rem);
+    color: var(--color-basalt);
+    line-height: 1;
+    margin-block: 0.5rem 0.75rem;
+  }
+
+  .page-sub {
+    color: var(--color-basalt-soft);
+    max-width: 480px;
+  }
+
+  /* ── Section ────────────────────────────────────────────────────────────── */
+  .planning-section {
+    padding-block: 3rem 6rem;
+  }
+
+  /* ── Bloc jour (details/summary) ────────────────────────────────────────── */
+  .day-block {
+    border-bottom: 1px solid var(--color-stone-deep);
+  }
+
+  .day-block:first-child {
+    border-top: 1px solid var(--color-stone-deep);
+  }
+
+  /* Supprimer le triangle natif du navigateur */
+  .day-summary { list-style: none; }
+  .day-summary::-webkit-details-marker { display: none; }
+
+  .day-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.5rem;
+    cursor: pointer;
+    gap: 1rem;
+    user-select: none;
+    transition: background 0.15s;
+    border-radius: 4px;
+  }
+
+  .day-summary:hover {
+    background: var(--color-stone-card);
+  }
+
+  .day-block--empty .day-summary {
+    opacity: 0.55;
+  }
+
+  .day-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .day-number {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--color-ocean);
+    width: 2.5rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .day-number--dot {
+    color: var(--color-basalt-faint);
+  }
+
+  .day-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .day-short {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-basalt-faint);
+  }
+
+  .day-long {
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    font-weight: 500;
+    color: var(--color-basalt);
+    line-height: 1;
+  }
+
+  .day-summary-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  .day-count {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-basalt-faint);
+    background: var(--color-stone-deep);
+    padding: 0.2rem 0.75rem;
+    border-radius: 100px;
+  }
+
+  .day-count--empty {
+    background: transparent;
+    font-style: italic;
+  }
+
+  .day-chevron {
+    font-size: 1.25rem;
+    color: var(--color-basalt-faint);
+    transition: transform 0.25s ease;
+    line-height: 1;
+  }
+
+  details[open] .day-chevron {
+    transform: rotate(90deg);
+  }
+
+  /* ── Contenu déplié ─────────────────────────────────────────────────────── */
+  .day-content {
+    padding-bottom: 1.5rem;
+  }
+
+  .day-free {
+    font-size: 14px;
+    color: var(--color-basalt-faint);
+    font-style: italic;
+    padding-left: 3.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  /* ── Section non assignées ──────────────────────────────────────────────── */
+  .day-block--unassigned {
+    margin-top: 2.5rem;
+    border: 1.5px dashed var(--color-stone-deep);
+    border-radius: 12px;
+    padding-inline: 1rem;
+  }
+
+  .day-block--unassigned:first-child {
+    border-top: 1.5px dashed var(--color-stone-deep);
+  }
+
+  /* ── Cards activités ────────────────────────────────────────────────────── */
+  .day-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-left: 3.75rem;
+  }
+
+  .pcard {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    background: var(--color-stone-card);
+    border: 1px solid var(--color-stone-deep);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .pcard:hover {
+    box-shadow: var(--shadow-soft);
+    transform: translateX(4px);
+  }
+
+  .pcard-photo {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+  }
+
+  .pcard-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pcard-body {
+    padding-block: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .pcard-type {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .pcard-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-basalt);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pcard-meta {
+    font-size: 11px;
+    color: var(--color-basalt-faint);
+  }
+
+  .pcard-arrow {
+    padding-right: 1.25rem;
+    color: var(--color-basalt-faint);
+    font-size: 1rem;
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .pcard:hover .pcard-arrow {
+    color: var(--color-ocean);
+    transform: translateX(3px);
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .day-cards { padding-left: 0; }
+    .day-long { font-size: 1.1rem; }
+    .pcard-arrow { display: none; }
+    .pcard { grid-template-columns: 60px 1fr; }
+    .pcard-photo { width: 60px; height: 60px; }
+  }
+</style>
