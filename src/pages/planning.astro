@@ -1,28 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { activities } from '../data/activities'
 import { orderedDays, dayLabels } from '../data/trip'
 
 const base = import.meta.env.BASE_URL
-
-const typeLabels: Record<string, string> = {
-  surf: 'Surf', rando: 'Randonnée', restaurant: 'Restaurant',
-  viewpoint: 'Point de vue', swim: 'Baignade', other: 'Autre',
-}
-const typeIcons: Record<string, string> = {
-  surf: '🏄', rando: '🥾', restaurant: '🍽',
-  viewpoint: '🔭', swim: '🏊', other: '📍',
-}
-const typeColors: Record<string, string> = {
-  surf: '#1E4A6B', rando: '#3B6B45', restaurant: '#E06B2C',
-  viewpoint: '#7FA8BE', swim: '#3A7599', other: '#7A8A92',
-}
-
-// Les assignations viennent de Supabase (côté client) — sera hydraté par Feature 4
-// En attendant : squelette statique avec toutes les activités non assignées
-const byDay = Object.fromEntries(orderedDays.map(d => [d, [] as typeof activities]))
-const unassigned = activities
-const totalAssigned = 0
 ---
 
 <BaseLayout title="Planning" description="Notre planning jour par jour pour Madère.">
@@ -31,120 +11,262 @@ const totalAssigned = 0
     <div class="shell">
       <p class="eyebrow">25 juillet — 1er août 2026</p>
       <h1 class="page-title">Planning</h1>
-      <p class="page-sub">
-        {totalAssigned} activité{totalAssigned > 1 ? 's' : ''} placée{totalAssigned > 1 ? 's' : ''} sur 8 jours.
-        {unassigned.length > 0 && `${unassigned.length} encore à assigner.`}
-      </p>
+      <p class="page-sub" id="planning-stats">Chargement…</p>
     </div>
   </div>
 
   <section class="planning-section">
     <div class="shell">
 
-      <!-- ── 8 jours ─────────────────────────────────────────────────────── -->
-      {orderedDays.map((dayKey, i) => {
-        const label = dayLabels[dayKey]
-        const dayActivities = byDay[dayKey] ?? []
-        const isEmpty = dayActivities.length === 0
-
-        return (
-          <details class={`day-block ${isEmpty ? 'day-block--empty' : ''}`} open={!isEmpty}>
-            <summary class="day-summary">
-              <div class="day-summary-left">
-                <span class="day-number">J{label.dayNumber}</span>
-                <div class="day-meta">
-                  <span class="day-short">{label.short}</span>
-                  <h2 class="day-long">{label.long}</h2>
-                </div>
-              </div>
-              <div class="day-summary-right">
-                {isEmpty
-                  ? <span class="day-count day-count--empty">Libre</span>
-                  : <span class="day-count">{dayActivities.length} activité{dayActivities.length > 1 ? 's' : ''}</span>
-                }
-                <span class="day-chevron" aria-hidden="true">›</span>
-              </div>
-            </summary>
-
-            <div class="day-content">
-              {isEmpty ? (
-                <p class="day-free">Aucune activité prévue — journée libre.</p>
-              ) : (
-                <div class="day-cards">
-                  {dayActivities.map(activity => (
-                    <a href={`${base}activities/${activity.slug}/`} class="pcard">
-                      <div class="pcard-photo">
-                        <img src={activity.photos[0]} alt={activity.name} loading="lazy" />
-                      </div>
-                      <div class="pcard-body">
-                        <p class="pcard-type" style={`color:${typeColors[activity.type]}`}>
-                          {typeIcons[activity.type]} {typeLabels[activity.type]}
-                        </p>
-                        <h3 class="pcard-name">{activity.name}</h3>
-                        {activity.duration && (
-                          <p class="pcard-meta">⏱ {activity.duration}</p>
-                        )}
-                        {activity.address && (
-                          <p class="pcard-meta">📍 {activity.address}</p>
-                        )}
-                      </div>
-                      <span class="pcard-arrow" aria-hidden="true">→</span>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          </details>
-        )
-      })}
-
-      <!-- ── Non assignées ──────────────────────────────────────────────── -->
-      {unassigned.length > 0 && (
-        <details class="day-block day-block--unassigned" open>
+      <!-- 8 jours — squelette statique hydraté par Supabase -->
+      {orderedDays.map(d => (
+        <details class="day-block day-block--empty" id={`dblock-${d}`}>
           <summary class="day-summary">
             <div class="day-summary-left">
-              <span class="day-number day-number--dot">?</span>
+              <span class="day-number">J{dayLabels[d].dayNumber}</span>
               <div class="day-meta">
-                <span class="day-short">—</span>
-                <h2 class="day-long">Non assignées</h2>
+                <span class="day-short">{dayLabels[d].short}</span>
+                <h2 class="day-long">{dayLabels[d].long}</h2>
               </div>
             </div>
             <div class="day-summary-right">
-              <span class="day-count">{unassigned.length} activité{unassigned.length > 1 ? 's' : ''}</span>
+              <span class="day-count day-count--empty" id={`dcount-${d}`}>Libre</span>
               <span class="day-chevron" aria-hidden="true">›</span>
             </div>
           </summary>
-          <div class="day-content">
-            <div class="day-cards">
-              {unassigned.map(activity => (
-                <a href={`${base}activities/${activity.slug}/`} class="pcard">
-                  <div class="pcard-photo">
-                    <img src={activity.photos[0]} alt={activity.name} loading="lazy" />
-                  </div>
-                  <div class="pcard-body">
-                    <p class="pcard-type" style={`color:${typeColors[activity.type]}`}>
-                      {typeIcons[activity.type]} {typeLabels[activity.type]}
-                    </p>
-                    <h3 class="pcard-name">{activity.name}</h3>
-                    {activity.duration && (
-                      <p class="pcard-meta">⏱ {activity.duration}</p>
-                    )}
-                  </div>
-                  <span class="pcard-arrow" aria-hidden="true">→</span>
-                </a>
-              ))}
+          <div class="day-content" id={`dcontent-${d}`}></div>
+        </details>
+      ))}
+
+      <!-- Non assignées -->
+      <details class="day-block day-block--unassigned" id="dblock-unassigned" hidden>
+        <summary class="day-summary">
+          <div class="day-summary-left">
+            <span class="day-number day-number--dot">?</span>
+            <div class="day-meta">
+              <span class="day-short">—</span>
+              <h2 class="day-long">Non assignées</h2>
             </div>
           </div>
-        </details>
-      )}
+          <div class="day-summary-right">
+            <span class="day-count" id="dcount-unassigned">—</span>
+            <span class="day-chevron" aria-hidden="true">›</span>
+          </div>
+        </summary>
+        <div class="day-content" id="dcontent-unassigned"></div>
+      </details>
 
     </div>
   </section>
 
 </BaseLayout>
 
-<style>
-  /* ── Hero ──────────────────────────────────────────────────────────────── */
+<script>
+  import { getAssignments, setDay, toggleDone, subscribeToChanges } from '../lib/assignments'
+  import { activities } from '../data/activities'
+  import { orderedDays, dayLabels } from '../data/trip'
+  import type { Day } from '../data/trip'
+
+  const base = import.meta.env.BASE_URL
+
+  const typeLabels: Record<string, string> = {
+    surf: 'Surf', rando: 'Randonnée', restaurant: 'Restaurant',
+    viewpoint: 'Point de vue', swim: 'Baignade', other: 'Autre',
+  }
+  const typeIcons: Record<string, string> = {
+    surf: '🏄', rando: '🥾', restaurant: '🍽',
+    viewpoint: '🔭', swim: '🏊', other: '📍',
+  }
+  const typeColors: Record<string, string> = {
+    surf: '#1E4A6B', rando: '#3B6B45', restaurant: '#E06B2C',
+    viewpoint: '#7FA8BE', swim: '#3A7599', other: '#7A8A92',
+  }
+
+  // ── Templates HTML ──────────────────────────────────────────────────────────
+
+  function dayPickerHtml(slug: string, currentDay: string | null) {
+    const optionsHtml = orderedDays.map(d => `
+      <button class="dp-option ${currentDay === d ? 'dp-opt--active' : ''}" data-day="${d}" data-label="${dayLabels[d].long}" type="button">
+        <span class="dp-opt-short">${dayLabels[d].short}</span>
+        <span class="dp-opt-date">${dayLabels[d].date.slice(8)}</span>
+      </button>
+    `).join('')
+    return `
+      <div class="day-picker pcard-dp" data-slug="${slug}">
+        <button class="dp-trigger pdp-trigger" type="button">
+          <span class="dp-text">${currentDay ? dayLabels[currentDay as Day].short : '+ Jour'}</span>
+          <span class="dp-chevron">▾</span>
+        </button>
+        <div class="dp-dropdown" hidden>
+          <div class="dp-grid">${optionsHtml}</div>
+          <button class="dp-clear" type="button" style="${currentDay ? '' : 'display:none'}">✕ Retirer</button>
+        </div>
+      </div>
+    `
+  }
+
+  function makePcard(a: typeof activities[0], done: boolean, day: string | null) {
+    return `
+      <div class="pcard ${done ? 'pcard--done' : ''}" data-slug="${a.slug}">
+        <button class="pcheck" type="button" data-slug="${a.slug}" aria-pressed="${done}" aria-label="${done ? 'Marquer comme non fait' : 'Marquer comme fait'}">
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true">
+            <polyline points="1,5 4.5,8.5 11,1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="pcard-photo">
+          <img src="${a.photos[0]}" alt="${a.name}" loading="lazy" />
+        </div>
+        <div class="pcard-body">
+          <p class="pcard-type" style="color:${typeColors[a.type]}">${typeIcons[a.type]} ${typeLabels[a.type]}</p>
+          <h3 class="pcard-name">${a.name}</h3>
+          ${a.duration ? `<p class="pcard-meta">⏱ ${a.duration}</p>` : ''}
+        </div>
+        ${dayPickerHtml(a.slug, day)}
+        <a href="${base}activities/${a.slug}/" class="pcard-link" aria-label="Voir la fiche">→</a>
+      </div>
+    `
+  }
+
+  function dayCardsHtml(items: Array<{ a: typeof activities[0]; done: boolean; day: string | null }>) {
+    return `<div class="day-cards">${items.map(({ a, done, day }) => makePcard(a, done, day)).join('')}</div>`
+  }
+
+  // ── Rendu ───────────────────────────────────────────────────────────────────
+
+  function render(assignmentMap: Map<string, { day: string | null; done: boolean }>) {
+    const byDay: Record<string, Array<{ a: typeof activities[0]; done: boolean; day: string | null }>> =
+      Object.fromEntries(orderedDays.map(d => [d, []]))
+    const unassigned: Array<{ a: typeof activities[0]; done: boolean; day: string | null }> = []
+
+    for (const a of activities) {
+      const assignment = assignmentMap.get(a.slug)
+      const day  = assignment?.day ?? null
+      const done = assignment?.done ?? false
+      if (day && byDay[day]) {
+        byDay[day].push({ a, done, day })
+      } else {
+        unassigned.push({ a, done, day: null })
+      }
+    }
+
+    // Stats
+    const totalAssigned = activities.length - unassigned.length
+    const stats = document.getElementById('planning-stats')
+    if (stats) {
+      stats.textContent = totalAssigned === 0
+        ? `Aucune activité placée. ${activities.length} encore à assigner.`
+        : `${totalAssigned} activité${totalAssigned > 1 ? 's' : ''} placée${totalAssigned > 1 ? 's' : ''} sur 8 jours.${unassigned.length > 0 ? ` ${unassigned.length} encore à assigner.` : ' Planning complet ✓'}`
+    }
+
+    // Sections jour
+    for (const d of orderedDays) {
+      const items   = byDay[d]
+      const content = document.getElementById(`dcontent-${d}`)
+      const count   = document.getElementById(`dcount-${d}`)
+      const block   = document.getElementById(`dblock-${d}`)
+      if (!content || !count || !block) continue
+
+      if (items.length === 0) {
+        content.innerHTML = '<p class="day-free">Aucune activité prévue — journée libre.</p>'
+        count.textContent = 'Libre'
+        count.className   = 'day-count day-count--empty'
+        block.removeAttribute('open')
+        block.classList.add('day-block--empty')
+      } else {
+        content.innerHTML = dayCardsHtml(items)
+        count.textContent = `${items.length} activité${items.length > 1 ? 's' : ''}`
+        count.className   = 'day-count'
+        block.setAttribute('open', '')
+        block.classList.remove('day-block--empty')
+      }
+    }
+
+    // Section non assignées
+    const unassignedBlock   = document.getElementById('dblock-unassigned') as HTMLDetailsElement
+    const unassignedContent = document.getElementById('dcontent-unassigned')
+    const unassignedCount   = document.getElementById('dcount-unassigned')
+    if (unassignedBlock && unassignedContent && unassignedCount) {
+      if (unassigned.length === 0) {
+        unassignedBlock.hidden = true
+      } else {
+        unassignedBlock.hidden = false
+        unassignedBlock.open   = true
+        unassignedContent.innerHTML = dayCardsHtml(unassigned)
+        unassignedCount.textContent = `${unassigned.length} activité${unassigned.length > 1 ? 's' : ''}`
+      }
+    }
+  }
+
+  // ── Événements (délégation) ─────────────────────────────────────────────────
+
+  const section = document.querySelector('.planning-section')!
+
+  section.addEventListener('click', async e => {
+    const target = e.target as HTMLElement
+
+    // Checkbox
+    const pcheck = target.closest<HTMLButtonElement>('.pcheck')
+    if (pcheck) {
+      e.stopPropagation()
+      await toggleDone(pcheck.dataset.slug!)
+      render(await getAssignments())
+      return
+    }
+
+    // Trigger day picker
+    const trigger = target.closest<HTMLButtonElement>('.dp-trigger')
+    if (trigger) {
+      e.stopPropagation()
+      const picker   = trigger.closest<HTMLElement>('.day-picker')!
+      const dropdown = picker.querySelector<HTMLElement>('.dp-dropdown')!
+      const opening  = dropdown.hidden
+      closeAll()
+      if (opening) { dropdown.hidden = false; picker.classList.add('dp--open') }
+      return
+    }
+
+    // Choisir un jour
+    const opt = target.closest<HTMLButtonElement>('.dp-option')
+    if (opt) {
+      e.stopPropagation()
+      const slug = opt.closest<HTMLElement>('.day-picker')!.dataset.slug!
+      closeAll()
+      await setDay(slug, opt.dataset.day as Day)
+      render(await getAssignments())
+      return
+    }
+
+    // Retirer le jour
+    const clear = target.closest<HTMLButtonElement>('.dp-clear')
+    if (clear) {
+      e.stopPropagation()
+      const slug = clear.closest<HTMLElement>('.day-picker')!.dataset.slug!
+      closeAll()
+      await setDay(slug, null)
+      render(await getAssignments())
+      return
+    }
+  })
+
+  document.addEventListener('click', closeAll)
+
+  function closeAll() {
+    document.querySelectorAll<HTMLElement>('.dp-dropdown').forEach(d => { d.hidden = true })
+    document.querySelectorAll<HTMLElement>('.day-picker').forEach(p => p.classList.remove('dp--open'))
+  }
+
+  // ── Init + realtime ─────────────────────────────────────────────────────────
+
+  async function init() {
+    const map = await getAssignments()
+    render(map)
+    subscribeToChanges(async () => render(await getAssignments()))
+  }
+  init()
+</script>
+
+<style is:global>
+  /* ── Hero ─────────────────────────────────────────────────────────────────── */
   .page-hero {
     padding-top: 9rem;
     padding-bottom: 4rem;
@@ -161,24 +283,23 @@ const totalAssigned = 0
 
   .page-sub {
     color: var(--color-basalt-soft);
-    max-width: 480px;
+    max-width: 520px;
   }
 
-  /* ── Section ────────────────────────────────────────────────────────────── */
+  /* ── Section ──────────────────────────────────────────────────────────────── */
   .planning-section {
     padding-block: 3rem 6rem;
   }
 
-  /* ── Bloc jour (details/summary) ────────────────────────────────────────── */
+  /* ── Bloc jour ────────────────────────────────────────────────────────────── */
   .day-block {
     border-bottom: 1px solid var(--color-stone-deep);
   }
 
-  .day-block:first-child {
+  .day-block:first-of-type {
     border-top: 1px solid var(--color-stone-deep);
   }
 
-  /* Supprimer le triangle natif du navigateur */
   .day-summary { list-style: none; }
   .day-summary::-webkit-details-marker { display: none; }
 
@@ -194,13 +315,8 @@ const totalAssigned = 0
     border-radius: 4px;
   }
 
-  .day-summary:hover {
-    background: var(--color-stone-card);
-  }
-
-  .day-block--empty .day-summary {
-    opacity: 0.55;
-  }
+  .day-summary:hover { background: var(--color-stone-card); }
+  .day-block--empty .day-summary { opacity: 0.5; }
 
   .day-summary-left {
     display: flex;
@@ -218,9 +334,7 @@ const totalAssigned = 0
     flex-shrink: 0;
   }
 
-  .day-number--dot {
-    color: var(--color-basalt-faint);
-  }
+  .day-number--dot { color: var(--color-basalt-faint); }
 
   .day-meta {
     display: flex;
@@ -271,14 +385,10 @@ const totalAssigned = 0
     line-height: 1;
   }
 
-  details[open] .day-chevron {
-    transform: rotate(90deg);
-  }
+  details[open] .day-chevron { transform: rotate(90deg); }
 
-  /* ── Contenu déplié ─────────────────────────────────────────────────────── */
-  .day-content {
-    padding-bottom: 1.5rem;
-  }
+  /* ── Contenu ──────────────────────────────────────────────────────────────── */
+  .day-content { padding-bottom: 1.5rem; }
 
   .day-free {
     font-size: 14px;
@@ -288,7 +398,7 @@ const totalAssigned = 0
     padding-bottom: 0.5rem;
   }
 
-  /* ── Section non assignées ──────────────────────────────────────────────── */
+  /* ── Non assignées ────────────────────────────────────────────────────────── */
   .day-block--unassigned {
     margin-top: 2.5rem;
     border: 1.5px dashed var(--color-stone-deep);
@@ -296,11 +406,7 @@ const totalAssigned = 0
     padding-inline: 1rem;
   }
 
-  .day-block--unassigned:first-child {
-    border-top: 1.5px dashed var(--color-stone-deep);
-  }
-
-  /* ── Cards activités ────────────────────────────────────────────────────── */
+  /* ── Cards ────────────────────────────────────────────────────────────────── */
   .day-cards {
     display: flex;
     flex-direction: column;
@@ -310,26 +416,62 @@ const totalAssigned = 0
 
   .pcard {
     display: grid;
-    grid-template-columns: 72px 1fr auto;
+    grid-template-columns: 36px 64px 1fr auto auto;
     align-items: center;
-    gap: 1rem;
+    gap: 0.85rem;
     background: var(--color-stone-card);
     border: 1px solid var(--color-stone-deep);
     border-radius: 12px;
-    overflow: hidden;
-    text-decoration: none;
-    transition: box-shadow 0.2s, transform 0.2s;
+    overflow: visible;
+    transition: box-shadow 0.2s, opacity 0.2s;
   }
 
-  .pcard:hover {
-    box-shadow: var(--shadow-soft);
-    transform: translateX(4px);
+  .pcard:hover { box-shadow: 0 4px 16px rgba(22,26,29,.08); }
+
+  .pcard--done {
+    opacity: 0.6;
   }
 
-  .pcard-photo {
-    width: 72px;
-    height: 72px;
+  .pcard--done .pcard-name {
+    text-decoration: line-through;
+    color: var(--color-basalt-faint);
+  }
+
+  /* Checkbox */
+  .pcheck {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--color-stone-deep);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    margin-left: 0.5rem;
+  }
+
+  .pcheck:hover {
+    border-color: #3B6B45;
+    background: rgba(59,107,69,.08);
+    color: rgba(59,107,69,.4);
+  }
+
+  .pcard--done .pcheck {
+    background: #3B6B45;
+    border-color: #3B6B45;
+    color: white;
+  }
+
+  /* Photo */
+  .pcard-photo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 0;
   }
 
   .pcard-photo img {
@@ -339,6 +481,7 @@ const totalAssigned = 0
     display: block;
   }
 
+  /* Body */
   .pcard-body {
     padding-block: 0.75rem;
     display: flex;
@@ -356,13 +499,14 @@ const totalAssigned = 0
 
   .pcard-name {
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 500;
     color: var(--color-basalt);
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.2s, text-decoration 0.2s;
   }
 
   .pcard-meta {
@@ -370,24 +514,125 @@ const totalAssigned = 0
     color: var(--color-basalt-faint);
   }
 
-  .pcard-arrow {
+  /* Day picker inline */
+  .pcard-dp {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .pdp-trigger {
+    padding: 0.3rem 0.65rem;
+    border-radius: 100px;
+    border: 1.5px solid var(--color-stone-deep);
+    background: transparent;
+    color: var(--color-basalt-soft);
+    font-size: 11px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .pdp-trigger:hover {
+    border-color: var(--color-ocean);
+    color: var(--color-ocean);
+  }
+
+  .pcard-dp .dp-dropdown {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    left: auto;
+    background: var(--color-stone);
+    border: 1px solid var(--color-stone-deep);
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 0 -8px 24px rgba(22,26,29,.18);
+    z-index: 50;
+    width: 200px;
+  }
+
+  .dp-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.2rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .dp-option {
+    padding: 0.3rem 0.15rem;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--color-basalt-soft);
+    font-size: 9.5px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .dp-option:hover { background: var(--color-stone-deep); }
+
+  .dp-opt--active {
+    background: var(--color-ocean) !important;
+    color: white !important;
+    border-color: var(--color-ocean) !important;
+  }
+
+  .dp-opt-short { display: block; font-weight: 600; }
+  .dp-opt-date  { display: block; opacity: 0.7; }
+
+  .dp-clear {
+    width: 100%;
+    padding: 0.3rem;
+    border: none;
+    background: transparent;
+    color: var(--color-basalt-faint);
+    font-size: 10px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    text-align: center;
+    border-top: 1px solid var(--color-stone-deep);
+    padding-top: 0.4rem;
+    transition: color 0.15s;
+  }
+
+  .dp-clear:hover { color: var(--color-paradise); }
+
+  .dp-chevron {
+    font-size: 10px;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+
+  .day-picker.dp--open .dp-chevron { transform: rotate(180deg); }
+
+  /* Lien fiche */
+  .pcard-link {
     padding-right: 1.25rem;
     color: var(--color-basalt-faint);
     font-size: 1rem;
+    text-decoration: none;
     transition: color 0.2s, transform 0.2s;
+    display: inline-block;
   }
 
-  .pcard:hover .pcard-arrow {
+  .pcard:hover .pcard-link {
     color: var(--color-ocean);
     transform: translateX(3px);
   }
 
-  /* ── Responsive ─────────────────────────────────────────────────────────── */
+  /* ── Responsive ───────────────────────────────────────────────────────────── */
   @media (max-width: 640px) {
     .day-cards { padding-left: 0; }
-    .day-long { font-size: 1.1rem; }
-    .pcard-arrow { display: none; }
-    .pcard { grid-template-columns: 60px 1fr; }
-    .pcard-photo { width: 60px; height: 60px; }
+    .day-long  { font-size: 1.1rem; }
+    .pcard { grid-template-columns: 36px 56px 1fr auto; }
+    .pcard-link { display: none; }
+    .pcard-photo { width: 56px; height: 56px; }
   }
 </style>
