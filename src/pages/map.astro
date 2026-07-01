@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { activities } from '../data/activities'
-import { dayLabels } from '../data/trip'
+import { orderedDays, dayLabels } from '../data/trip'
 
 const base = import.meta.env.BASE_URL
 
@@ -21,26 +21,43 @@ const activitiesJson = JSON.stringify(activities.map(a => ({
   photo: a.photos[0],
   shortDescription: a.shortDescription,
   coordinates: a.coordinates,
-  dayLabel: a.day ? dayLabels[a.day].long : null,
 })))
 
 const typeConfigJson = JSON.stringify(typeConfig)
 const baseUrl = base
+
+// Mapping jour → {dayNumber, long} pour le script Leaflet
+const dayLabelsJson = JSON.stringify(
+  Object.fromEntries(orderedDays.map(d => [d, { dayNumber: dayLabels[d].dayNumber, long: dayLabels[d].long }]))
+)
 ---
 
 <BaseLayout title="Carte" description="Carte interactive de tous nos spots à Madère.">
   <div class="map-page">
-    <!-- Nav flottante au-dessus de la carte -->
     <div class="map-controls">
-      <div class="map-filters" role="group" aria-label="Filtrer les markers">
-        <button class="map-filter-btn active" data-type="all">Tout</button>
+
+      <!-- Filtres par type -->
+      <div class="map-filters" role="group" aria-label="Filtrer par type">
+        <button class="map-filter-btn type-filter-btn active" data-type="all">Tout</button>
         {Object.entries(typeConfig).map(([type, cfg]) => (
-          <button class="map-filter-btn" data-type={type} style={`--dot: ${cfg.color}`}>
+          <button class="map-filter-btn type-filter-btn" data-type={type} style={`--dot: ${cfg.color}`}>
             <span class="mfb-dot"></span>
             {cfg.label}
           </button>
         ))}
       </div>
+
+      <!-- Filtres par jour (populé dynamiquement — grisé si aucune activité ce jour-là) -->
+      <div class="map-day-filters" id="day-filters" role="group" aria-label="Filtrer par jour">
+        <button class="day-filter-btn active" data-day="all">Tous les jours</button>
+        {orderedDays.map(d => (
+          <button class="day-filter-btn" data-day={d} id={`dfbtn-${d}`}>
+            J{dayLabels[d].dayNumber}
+          </button>
+        ))}
+      </div>
+
+      <!-- Légende types -->
       <div class="map-legend">
         {Object.entries(typeConfig).map(([type, cfg]) => (
           <span class="legend-item">
@@ -58,35 +75,41 @@ const baseUrl = base
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" is:inline></script>
 
-<script define:vars={{ activitiesJson, typeConfigJson, baseUrl }}>
-  const activities = JSON.parse(activitiesJson)
-  const typeConfig = JSON.parse(typeConfigJson)
+<script define:vars={{ activitiesJson, typeConfigJson, baseUrl, dayLabelsJson }}>
+  const activities  = JSON.parse(activitiesJson)
+  const typeConfig  = JSON.parse(typeConfigJson)
+  const dayLabels   = JSON.parse(dayLabelsJson)
 
-  // ── Init carte centrée sur Madère ────────────────────────────────────────
-  const map = L.map('map', {
-    center: [32.7, -17.0],
-    zoom: 10,
-    zoomControl: false,
-  })
+  // ── État des filtres ──────────────────────────────────────────────────────
+  let activeType = 'all'
+  let activeDay  = 'all'
 
+  // Assignations chargées depuis Supabase via CustomEvent
+  const assignmentsBySlug = {}
+
+  // ── Init carte ────────────────────────────────────────────────────────────
+  const map = L.map('map', { center: [32.7, -17.0], zoom: 10, zoomControl: false })
   L.control.zoom({ position: 'bottomright' }).addTo(map)
-
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18,
   }).addTo(map)
 
-  // ── Marker factory ────────────────────────────────────────────────────────
-  function makeIcon(type, active = true) {
-    const cfg = typeConfig[type] || typeConfig.other
-    const color = cfg.color
+  // ── Marker factory avec badge jour optionnel ──────────────────────────────
+  function makeIcon(type, active = true, dayNumber = null) {
+    const cfg     = typeConfig[type] || typeConfig.other
+    const color   = cfg.color
     const opacity = active ? '1' : '0.35'
+    const badge   = dayNumber
+      ? `<span style="position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;background:white;border:1.5px solid ${color};border-radius:50%;font-size:8px;font-weight:700;color:${color};display:flex;align-items:center;justify-content:center;line-height:1;padding:0 2px">${dayNumber}</span>`
+      : ''
     return L.divIcon({
       className: '',
       html: `
         <div style="position:relative;width:36px;height:36px;opacity:${opacity};transition:opacity .2s">
           <div style="width:36px;height:36px;background:${color};border:3px solid #E8E4DD;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);box-shadow:0 4px 16px rgba(22,26,29,.35)"></div>
           <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);font-size:14px;line-height:1">${cfg.icon}</span>
+          ${badge}
         </div>
       `,
       iconSize: [36, 36],
@@ -97,17 +120,14 @@ const baseUrl = base
 
   // ── Markers + popups ──────────────────────────────────────────────────────
   const markersByType = {}
+  const markersBySlug = {}
 
   activities.forEach(activity => {
-    const cfg = typeConfig[activity.type] || typeConfig.other
+    const cfg    = typeConfig[activity.type] || typeConfig.other
     const marker = L.marker(
       [activity.coordinates.lat, activity.coordinates.lng],
       { icon: makeIcon(activity.type) }
     )
-
-    const dayBadge = activity.dayLabel
-      ? `<span class="popup-day">📅 ${activity.dayLabel}</span>`
-      : ''
 
     marker.bindPopup(L.popup({
       maxWidth: 300,
@@ -119,37 +139,108 @@ const baseUrl = base
         <div class="popup-body">
           <p class="popup-type">${cfg.icon} ${cfg.label}</p>
           <h3 class="popup-title">${activity.name}</h3>
-          ${dayBadge}
+          <span class="popup-day" id="popup-day-${activity.slug}"></span>
           <a href="${baseUrl}activities/${activity.slug}/" class="popup-link">Voir la fiche →</a>
         </div>
       </div>
     `))
 
     marker.addTo(map)
-
+    markersBySlug[activity.slug] = marker
     if (!markersByType[activity.type]) markersByType[activity.type] = []
     markersByType[activity.type].push(marker)
   })
 
-  // ── Filtres ───────────────────────────────────────────────────────────────
-  document.querySelectorAll('.map-filter-btn').forEach(btn => {
+  // ── Application des filtres combinés ──────────────────────────────────────
+  function applyFilters() {
+    activities.forEach(activity => {
+      const assignment = assignmentsBySlug[activity.slug]
+      const dayKey     = assignment?.day ?? null
+      const dayNumber  = dayKey ? (dayLabels[dayKey]?.dayNumber ?? null) : null
+
+      const typeMatch = activeType === 'all' || activity.type === activeType
+      const dayMatch  = activeDay  === 'all' || dayKey === activeDay
+      const show      = typeMatch && dayMatch
+
+      markersBySlug[activity.slug].setIcon(
+        makeIcon(activity.type, show, show && dayNumber ? dayNumber : null)
+      )
+      if (!show) markersBySlug[activity.slug].closePopup()
+    })
+  }
+
+  // ── Filtres type ──────────────────────────────────────────────────────────
+  document.querySelectorAll('.type-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'))
+      document.querySelectorAll('.type-filter-btn').forEach(b => b.classList.remove('active'))
       btn.classList.add('active')
-      const type = btn.dataset.type
-      Object.entries(markersByType).forEach(([t, markers]) => {
-        const show = type === 'all' || t === type
-        markers.forEach(m => {
-          m.setIcon(makeIcon(t, show))
-          if (!show) m.closePopup()
-        })
-      })
+      activeType = btn.dataset.type
+      applyFilters()
     })
   })
+
+  // ── Filtres jour ──────────────────────────────────────────────────────────
+  document.querySelectorAll('.day-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.day-filter-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      activeDay = btn.dataset.day
+      applyFilters()
+    })
+  })
+
+  // ── Écoute les assignations Supabase (module script) ─────────────────────
+  window.addEventListener('assignments-ready', e => {
+    for (const a of e.detail) {
+      assignmentsBySlug[a.activity_slug] = a
+      updatePopupDay(a.activity_slug, a.day)
+    }
+    // Met à jour les boutons jour : grisé si aucune activité ce jour-là
+    updateDayFilterState()
+    applyFilters()
+  })
+
+  window.addEventListener('assignment-updated', e => {
+    const a = e.detail
+    assignmentsBySlug[a.activity_slug] = a
+    updatePopupDay(a.activity_slug, a.day)
+    updateDayFilterState()
+    applyFilters()
+  })
+
+  function updatePopupDay(slug, day) {
+    const el = document.getElementById(`popup-day-${slug}`)
+    if (el) el.textContent = day ? `📅 ${dayLabels[day]?.long ?? day}` : ''
+  }
+
+  function updateDayFilterState() {
+    const assignedDays = new Set(
+      Object.values(assignmentsBySlug).map(a => a.day).filter(Boolean)
+    )
+    document.querySelectorAll('.day-filter-btn[data-day]').forEach(btn => {
+      const d = btn.dataset.day
+      if (d !== 'all') {
+        btn.classList.toggle('day-filter-btn--empty', !assignedDays.has(d))
+      }
+    })
+  }
+</script>
+
+<!-- Module script Supabase : charge les assignations et abonne au realtime -->
+<script>
+  import { getAssignments, subscribeToChanges } from '../lib/assignments'
+
+  async function init() {
+    const map = await getAssignments()
+    window.dispatchEvent(new CustomEvent('assignments-ready', { detail: [...map.values()] }))
+    subscribeToChanges(row => {
+      window.dispatchEvent(new CustomEvent('assignment-updated', { detail: row }))
+    })
+  }
+  init()
 </script>
 
 <style>
-  /* La page carte est full-screen, sans scroll */
   .map-page {
     position: fixed;
     inset: 0;
@@ -171,7 +262,7 @@ const baseUrl = base
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
     pointer-events: none;
   }
 
@@ -218,6 +309,44 @@ const baseUrl = base
     flex-shrink: 0;
   }
 
+  /* ── Filtres jour ───────────────────────────────────────────────────── */
+  .map-day-filters {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    pointer-events: all;
+    background: rgba(232, 228, 221, 0.88);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(216, 210, 200, 0.7);
+    border-radius: 100px;
+    padding: 0.35rem;
+    box-shadow: 0 4px 16px rgba(22,26,29,0.12);
+  }
+
+  .day-filter-btn {
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    border: none;
+    background: transparent;
+    color: var(--color-basalt-soft);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .day-filter-btn.active {
+    background: var(--color-ocean);
+    color: white;
+  }
+
+  .day-filter-btn--empty {
+    opacity: 0.4;
+  }
+
   /* ── Légende ────────────────────────────────────────────────────────── */
   .map-legend {
     display: flex;
@@ -248,7 +377,7 @@ const baseUrl = base
     flex-shrink: 0;
   }
 
-  /* ── Popup Leaflet custom ───────────────────────────────────────────── */
+  /* ── Popup ──────────────────────────────────────────────────────────── */
   :global(.custom-popup .leaflet-popup-content-wrapper) {
     border-radius: 16px;
     padding: 0;
@@ -262,14 +391,11 @@ const baseUrl = base
     width: 300px !important;
   }
 
-  :global(.custom-popup .leaflet-popup-tip-container) {
-    display: none;
-  }
+  :global(.custom-popup .leaflet-popup-tip-container) { display: none; }
 
   :global(.popup-inner) {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     display: flex;
-    gap: 0;
     background: #EFEAE3;
   }
 
@@ -313,6 +439,7 @@ const baseUrl = base
     font-size: 11px;
     color: #1E4A6B;
     font-weight: 500;
+    min-height: 0;
   }
 
   :global(.popup-link) {
@@ -328,12 +455,11 @@ const baseUrl = base
 
   :global(.popup-link:hover) { color: #E06B2C; }
 
-  :global(.popup-link:hover) { color: #3A7599; }
-
   /* ── Responsive ─────────────────────────────────────────────────────── */
   @media (max-width: 640px) {
     .map-controls { top: 4.5rem; width: 100%; padding-inline: 1rem; }
-    .map-filters { border-radius: 16px; padding: 0.5rem; }
-    .map-legend { display: none; }
+    .map-filters  { border-radius: 16px; padding: 0.5rem; }
+    .map-day-filters { border-radius: 16px; padding: 0.5rem; }
+    .map-legend   { display: none; }
   }
 </style>

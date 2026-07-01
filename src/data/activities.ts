@@ -1,5 +1,3 @@
-import type { Day } from './trip'
-
 export type ActivityType = 'surf' | 'rando' | 'restaurant' | 'viewpoint' | 'swim' | 'other'
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
@@ -15,7 +13,6 @@ export type Activity = {
   difficulty?: Difficulty
   bestTime?: string
   estimatedCost?: string
-  day?: Day
   address?: string
 }
 
@@ -40,7 +37,6 @@ Si la houle est trop grosse pour les débutants, l'école propose parfois de rid
     difficulty: 'easy',
     bestTime: "Matin (avant 11h), octobre à mars pour la houle",
     estimatedCost: "45–60€ cours débutant / gratuit si tu as ton propre matériel",
-    day: 'mon-27',
     address: 'Praia de Porto da Cruz, Porto da Cruz',
   },
   {
@@ -63,7 +59,6 @@ Prévoir des couches (il peut faire 10°C au sommet quand il fait 28°C sur le l
     difficulty: 'medium',
     bestTime: 'Tôt le matin (lever de soleil depuis le sommet), mai à octobre',
     estimatedCost: 'Gratuit — taxi retour ~25€',
-    day: 'sun-26',
     address: 'Pico do Areeiro, 9200-050 Madère',
   },
   {
@@ -85,7 +80,6 @@ Réservation obligatoire. Tenue correcte demandée (pas besoin de cravate, mais 
     duration: '2–3h',
     bestTime: 'Dîner (réservation obligatoire)',
     estimatedCost: '60–90€ par personne (avec vins)',
-    day: 'sat-25',
     address: 'Caminho do Palheiro 23, São Gonçalo, Funchal',
   },
 ]

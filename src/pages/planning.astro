@@ -18,12 +18,11 @@ const typeColors: Record<string, string> = {
   viewpoint: '#7FA8BE', swim: '#3A7599', other: '#7A8A92',
 }
 
-// Grouper les activités par jour
-const byDay = Object.fromEntries(
-  orderedDays.map(d => [d, activities.filter(a => a.day === d)])
-)
-const unassigned = activities.filter(a => !a.day)
-const totalAssigned = activities.filter(a => a.day).length
+// Les assignations viennent de Supabase (côté client) — sera hydraté par Feature 4
+// En attendant : squelette statique avec toutes les activités non assignées
+const byDay = Object.fromEntries(orderedDays.map(d => [d, [] as typeof activities]))
+const unassigned = activities
+const totalAssigned = 0
 ---
 
 <BaseLayout title="Planning" description="Notre planning jour par jour pour Madère.">

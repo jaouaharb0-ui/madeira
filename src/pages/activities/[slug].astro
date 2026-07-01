@@ -2,7 +2,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { activities, getActivity } from '../../data/activities'
 import type { Activity } from '../../data/activities'
-import { dayLabels } from '../../data/trip'
 
 export function getStaticPaths() {
   return activities.map(a => ({ params: { slug: a.slug } }))
@@ -61,7 +60,7 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${activity.coor
   </section>
 
   <!-- ── Corps principal ───────────────────────────────────────────────── -->
-  <div class="detail-body shell">
+  <div class="detail-body shell" data-activity-slug={activity.slug}>
     <div class="detail-main">
       <!-- Description longue -->
       <div class="detail-description">
@@ -143,12 +142,8 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${activity.coor
               <dd>{activity.estimatedCost}</dd>
             </>
           )}
-          {activity.day && (
-            <>
-              <dt>Jour prévu</dt>
-              <dd class="day-badge">{dayLabels[activity.day].long}</dd>
-            </>
-          )}
+          <dt id="day-label-dt" style="display:none">Jour prévu</dt>
+          <dd id={`day-label-${activity.slug}`} class="day-badge" style="display:none"></dd>
           {activity.address && (
             <>
               <dt>Adresse</dt>
@@ -273,6 +268,38 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${activity.coor
     if (e.key === 'ArrowLeft') prev()
     if (e.key === 'ArrowRight') next()
   })
+</script>
+
+<script>
+  // Affiche le jour assigné depuis Supabase dans la sidebar
+  import { getAssignments, subscribeToChanges } from '../../lib/assignments'
+  import { dayLabels } from '../../data/trip'
+  import type { Day } from '../../data/trip'
+
+  const slug = document.querySelector<HTMLElement>('[data-activity-slug]')?.dataset.activitySlug
+  if (slug) {
+    async function loadDay() {
+      const map = await getAssignments()
+      const a = map.get(slug!)
+      showDay(a?.day ?? null)
+      subscribeToChanges(row => { if (row.activity_slug === slug) showDay(row.day) })
+    }
+    loadDay()
+  }
+
+  function showDay(day: string | null) {
+    const dt = document.getElementById('day-label-dt')
+    const dd = document.getElementById(`day-label-${slug}`)
+    if (!dt || !dd) return
+    if (day) {
+      dd.textContent = dayLabels[day as Day]?.long ?? day
+      dt.style.display = ''
+      dd.style.display = ''
+    } else {
+      dt.style.display = 'none'
+      dd.style.display = 'none'
+    }
+  }
 </script>
 
 <style>
