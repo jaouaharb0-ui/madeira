@@ -11,7 +11,7 @@ const typeLabels: Record<string, string> = {
   restaurant: 'Restaurant',
   viewpoint: 'Point de vue',
   swim: 'Baignade',
-  other: 'Autre',
+  village: 'Village',
 }
 
 const typeIcons: Record<string, string> = {
@@ -20,7 +20,7 @@ const typeIcons: Record<string, string> = {
   restaurant: '🍽',
   viewpoint: '🔭',
   swim: '🏊',
-  other: '📍',
+  village: '🏘',
 }
 
 const typeColors: Record<string, string> = {
@@ -29,7 +29,7 @@ const typeColors: Record<string, string> = {
   restaurant: '#E06B2C',
   viewpoint: '#7FA8BE',
   swim: '#3A7599',
-  other: '#7A8A92',
+  village: '#8B6F47',
 }
 
 const allTypes = [...new Set(activities.map(a => a.type))]
@@ -916,7 +916,7 @@ const allTypes = [...new Set(activities.map(a => a.type))]
   :global(.agenda-tag--restaurant) { background: rgba(224,107,44,.12); color: #C05820; }
   :global(.agenda-tag--viewpoint)  { background: rgba(127,168,190,.2); color: #4A7B90; }
   :global(.agenda-tag--swim)       { background: rgba(58,117,153,.12); color: #3A7599; }
-  :global(.agenda-tag--other)      { background: rgba(122,138,146,.12);color: #7A8A92; }
+  :global(.agenda-tag--village)    { background: rgba(139,111,71,.12); color: #8B6F47; }
   :global(.agenda-empty)           { font-size: 11px; color: var(--color-basalt-faint); text-align: center; margin-top: 0.25rem; }
 
   /* ── Map preview ────────────────────────────────────────────────────────── */
