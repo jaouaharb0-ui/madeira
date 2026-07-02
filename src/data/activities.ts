@@ -29,8 +29,8 @@ export const activities: Activity[] = [
 
 Le village est aussi la capitale officieuse de la poncha, l'alcool de canne à sucre local — quelques bars anciens la servent à la main dans une céramique traditionnelle. En remontant vers les hauteurs, les ruelles dévoilent une vue sur les falaises de Cabo Girão qui ferment la baie à l'ouest.`,
     photos: [
-      'https://images.unsplash.com/photo-1570135009025-ad8fb5a54aa3?w=1200&q=80',
-      'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=1200&q=80',
+      'https://images.unsplash.com/photo-1510739628590-0c601822e0a0?w=1200&q=80',
+      'https://images.unsplash.com/photo-1689368696751-5f6539cdeb9d?w=1200&q=80',
     ],
     coordinates: { lat: 32.6503, lng: -16.9775 },
     duration: '1–2h',
@@ -48,8 +48,8 @@ Le village est aussi la capitale officieuse de la poncha, l'alcool de canne à s
 
 En fin d'après-midi, quand la lumière rasante dore les maisons blanches et que le soleil disparaît derrière les falaises à l'horizon, c'est une des vues les plus belles de la côte sud. Le front de mer est calme, les quelques restaurants servent du poisson frais et les locaux jouent aux cartes en terrasse.`,
     photos: [
-      'https://images.unsplash.com/photo-1573126617899-41f1dffb196c?w=1200&q=80',
-      'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&q=80',
+      'https://images.unsplash.com/photo-1753864471630-9e1e49db8b4e?w=1200&q=80',
+      'https://images.unsplash.com/photo-1748446745193-e95f11095eb7?w=1200&q=80',
     ],
     coordinates: { lat: 32.6800, lng: -17.1017 },
     duration: '1–2h',
@@ -67,8 +67,8 @@ En fin d'après-midi, quand la lumière rasante dore les maisons blanches et que
 
 C'est aussi l'un des meilleurs spots de longboard de Madère, avec une vague gauche longue qui déferle sur les rochers noirs en hiver. Le bar Pukiki, le seul tiki bar de l'île, est posé au bout de la promenade — c'est là qu'on finit les journées.`,
     photos: [
-      'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&q=80',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+      'https://images.unsplash.com/photo-1590133356909-68d64917b8a5?w=1200&q=80',
+      'https://images.unsplash.com/photo-1575199341312-3fbd5bdf4a9a?w=1200&q=80',
     ],
     coordinates: { lat: 32.7406, lng: -17.2297 },
     duration: '1–2h',
@@ -86,8 +86,8 @@ C'est aussi l'un des meilleurs spots de longboard de Madère, avec une vague gau
 
 Face au village, trois îlots volcaniques émergent des vagues. En arrière-plan, la rivière dévale la montagne en une cascade visible depuis la route. Le village lui-même est calme, presque vide, avec une demi-douzaine de maisons et un bar qui sert la soupe du jour.`,
     photos: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80',
+      'https://images.unsplash.com/photo-1621261574254-b3f12a818202?w=1200&q=80',
+      'https://images.unsplash.com/photo-1729093005675-3db7e9fae55d?w=1200&q=80',
     ],
     coordinates: { lat: 32.8658, lng: -17.1797 },
     duration: '30min–1h',
@@ -105,8 +105,8 @@ Face au village, trois îlots volcaniques émergent des vagues. En arrière-plan
 
 L'atmosphère y est différente du reste de l'île : plus fraîche, plus rurale, plus authentique. C'est aussi le point de départ du sentier vers Queimadas et la Levada do Caldeirão Verde.`,
     photos: [
-      'https://images.unsplash.com/photo-1516815231560-8f41ec531527?w=1200&q=80',
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
+      'https://images.unsplash.com/photo-1734631620960-cd60b3c65c30?w=1200&q=80',
+      'https://images.unsplash.com/photo-1733254730570-8b5de5ccdab7?w=1200&q=80',
     ],
     coordinates: { lat: 32.7944, lng: -16.8878 },
     duration: '1–2h',
@@ -126,8 +126,8 @@ L'atmosphère y est différente du reste de l'île : plus fraîche, plus rurale,
 
 En bas, sur les terrasses en culture, des agriculteurs travaillent encore leurs lopins accessibles uniquement par câble depuis le bord de falaise. Ce contraste — la modernité du plancher de verre, les vignes centenaires en contrebas — résume bien Madère. Meilleures lumières en fin de matinée, avant la brume de l'après-midi.`,
     photos: [
-      'https://images.unsplash.com/photo-1548784487-4b56a81b1e61?w=1200&q=80',
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80',
+      'https://images.unsplash.com/photo-1563041853-66cf297d468e?w=1200&q=80',
+      'https://images.unsplash.com/photo-1532017754072-c23ff26ea268?w=1200&q=80',
     ],
     coordinates: { lat: 32.6497, lng: -17.0450 },
     duration: '1h–1h30',
@@ -146,8 +146,8 @@ En bas, sur les terrasses en culture, des agriculteurs travaillent encore leurs 
 
 Le mirador est accessible depuis la route en quelques mètres à pied seulement. C'est un des spectacles les plus saisissants de la côte nord, et pourtant souvent désert hors saison. On peut combiner avec la plage de Seixal juste en contrebas.`,
     photos: [
-      'https://images.unsplash.com/photo-1580135649950-0d9bc7f1c023?w=1200&q=80',
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80',
+      'https://images.unsplash.com/photo-1757440156710-574dcfae0bcc?w=1200&q=80',
+      'https://images.unsplash.com/photo-1734631620517-0a8bd80756f4?w=1200&q=80',
     ],
     coordinates: { lat: 32.8186, lng: -17.1114 },
     duration: '30min',
@@ -165,8 +165,8 @@ Le mirador est accessible depuis la route en quelques mètres à pied seulement.
 
 En bas : une plage de galets noirs, une eau limpide turquoise et le silence absolu. La montée offre une perspective encore plus vertigineuse sur la paroi volcanique. C'est un des endroits les plus insolites de l'île — presque personne ne le fait.`,
     photos: [
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+      'https://images.unsplash.com/photo-1588358617669-56f0a72bcc71?w=1200&q=80',
+      'https://images.unsplash.com/photo-1581527840890-619413584d34?w=1200&q=80',
     ],
     coordinates: { lat: 32.8647, lng: -17.1853 },
     duration: '1h30–2h (aller-retour)',
@@ -184,8 +184,8 @@ En bas : une plage de galets noirs, une eau limpide turquoise et le silence abso
 
 C'est informel, animé et authentiquement local — bien loin des piscines d'hôtels. Le meilleur moment : en fin d'après-midi, quand la lumière descend sur l'eau et que la poncha commence à circuler.`,
     photos: [
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=1200&q=80',
+      'https://images.unsplash.com/photo-1748686856746-fc758ac9b4c7?w=1200&q=80',
+      'https://images.unsplash.com/photo-1664372915036-ae82aa958f37?w=1200&q=80',
     ],
     coordinates: { lat: 32.6481, lng: -16.8964 },
     duration: '2–4h',
@@ -205,8 +205,8 @@ C'est informel, animé et authentiquement local — bien loin des piscines d'hô
 
 Hors saison, la plage est quasi déserte et le cadre est saisissant. En été, elle attire les connaisseurs — les touristes de passage préfèrent généralement Porto Moniz. Il y a un café simple en haut des escaliers.`,
     photos: [
-      'https://images.unsplash.com/photo-1548784487-4b56a81b1e61?w=1200&q=80',
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
+      'https://images.unsplash.com/photo-1721411581935-50275ebeca6f?w=1200&q=80',
+      'https://images.unsplash.com/photo-1729094694723-b18469f416bf?w=1200&q=80',
     ],
     coordinates: { lat: 32.8222, lng: -17.1139 },
     duration: 'Demi-journée',
@@ -224,8 +224,8 @@ Hors saison, la plage est quasi déserte et le cadre est saisissant. En été, e
 
 À prévoir : chaussures d'eau (le basalte est coupant à l'entrée), crème solaire à index élevé (pas d'ombre), et une journée complète pour profiter du lieu sans se presser. Le trajet depuis Funchal par la route côtière nord vaut déjà le voyage.`,
     photos: [
-      'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=1200&q=80',
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
+      'https://images.unsplash.com/photo-1734631621470-d7eebf4d164b?w=1200&q=80',
+      'https://images.unsplash.com/photo-1743704952974-b4f411f5ceef?w=1200&q=80',
     ],
     coordinates: { lat: 32.8694, lng: -17.1667 },
     duration: 'Demi-journée à journée',
@@ -244,8 +244,8 @@ Hors saison, la plage est quasi déserte et le cadre est saisissant. En été, e
 
 Un spot pour ceux qui préfèrent la nature brute aux piscines balisées. L'accès est libre, sans ticket ni barrière. À combiner avec la plage de sable noir juste à côté et le miradouro du Véu da Noiva sur la route.`,
     photos: [
-      'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=1200&q=80',
-      'https://images.unsplash.com/photo-1548784487-4b56a81b1e61?w=1200&q=80',
+      'https://images.unsplash.com/photo-1705337033397-57832c08b70f?w=1200&q=80',
+      'https://images.unsplash.com/photo-1631715680382-7ac8f0eb4042?w=1200&q=80',
     ],
     coordinates: { lat: 32.8219, lng: -17.1078 },
     duration: '2–4h',
@@ -263,8 +263,8 @@ Un spot pour ceux qui préfèrent la nature brute aux piscines balisées. L'acc�
 
 Elle est souvent citée comme la meilleure plage de Madère — ce qui veut dire qu'elle peut être bondée en juillet-août. Hors saison, c'est un endroit calme et magnifique, à deux pas de la presqu'île de São Lourenço. Les rochers environnants permettent de bonnes sessions de snorkeling.`,
     photos: [
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&q=80',
+      'https://images.unsplash.com/photo-1612780329399-36d290bb8ae0?w=1200&q=80',
+      'https://images.unsplash.com/photo-1631715680382-7ac8f0eb4042?w=1200&q=80',
     ],
     coordinates: { lat: 32.7367, lng: -16.7208 },
     duration: 'Demi-journée',
@@ -282,8 +282,8 @@ Elle est souvent citée comme la meilleure plage de Madère — ce qui veut dire
 
 L'accès se fait depuis la plage de Garajau (téléphérique depuis la route ou descente à pied). La visibilité est souvent excellente (15–20m). On loue masques et tubas sur place ou on peut organiser une sortie guidée avec une école de plongée locale.`,
     photos: [
-      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&q=80',
-      'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&q=80',
+      'https://images.unsplash.com/photo-1696831387657-e63ea42b42bc?w=1200&q=80',
+      'https://images.unsplash.com/photo-1769237711549-adbb59dd33d0?w=1200&q=80',
     ],
     coordinates: { lat: 32.6336, lng: -16.8461 },
     duration: '2–3h',
@@ -302,8 +302,8 @@ L'accès se fait depuis la plage de Garajau (téléphérique depuis la route ou 
 
 En bas : une plage de galets, une eau limpide, un restaurant de poisson grillé et le silence. On peut passer la journée à nager, manger et ne rien faire. C'est l'endroit le plus étrange et le plus beau de la côte sud — à réserver à l'avance car l'accès est limité.`,
     photos: [
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=1200&q=80',
+      'https://images.unsplash.com/photo-1610989567958-41b2628ea85c?w=1200&q=80',
+      'https://images.unsplash.com/photo-1674333362725-84e9996aa6fb?w=1200&q=80',
     ],
     coordinates: { lat: 32.6639, lng: -17.0642 },
     duration: 'Demi-journée à journée',
@@ -323,8 +323,8 @@ En bas : une plage de galets, une eau limpide, un restaurant de poisson grillé 
 
 C'est aussi le départ officiel du PR1, la grande traversée vers Pico Ruivo. Quelques minutes de marche depuis le parking suffisent pour atteindre le belvédère principal. Prévoir des couches — il peut faire 10°C au sommet quand il fait 28°C sur le littoral.`,
     photos: [
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80',
-      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80',
+      'https://images.unsplash.com/photo-1753864471630-9e1e49db8b4e?w=1200&q=80',
+      'https://images.unsplash.com/photo-1721241843687-fed85df281d1?w=1200&q=80',
     ],
     coordinates: { lat: 32.7222, lng: -16.9282 },
     duration: '30min–1h (miradouro seul)',
@@ -343,8 +343,8 @@ C'est aussi le départ officiel du PR1, la grande traversée vers Pico Ruivo. Qu
 
 La maison d'abri au sommet permet de pique-niquer à l'abri du vent. C'est aussi l'arrivée du PR1 depuis Arieiro — si on fait la traversée dans ce sens, on redescend depuis ici en taxi ou navette via Achada do Teixeira.`,
     photos: [
-      'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1200&q=80',
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80',
+      'https://images.unsplash.com/photo-1721400500612-aa67ae9668f6?w=1200&q=80',
+      'https://images.unsplash.com/photo-1630324111397-0463bbd27145?w=1200&q=80',
     ],
     coordinates: { lat: 32.7539, lng: -16.9144 },
     duration: '1h30–2h (aller-retour depuis Achada do Teixeira)',
@@ -363,9 +363,8 @@ La maison d'abri au sommet permet de pique-niquer à l'abri du vent. C'est aussi
 
 Prévoir 3–4h dans le sens Arieiro → Ruivo, un taxi ou navette pour le retour depuis Achada do Teixeira, des couches (il peut faire 10°C au sommet), de bonnes chaussures et suffisamment d'eau — aucun point de ravitaillement sur le sentier.`,
     photos: [
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80',
-      'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1200&q=80',
-      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80',
+      'https://images.unsplash.com/photo-1621261574254-b3f12a818202?w=1200&q=80',
+      'https://images.unsplash.com/photo-1691588638068-c54a388b31a3?w=1200&q=80',
     ],
     coordinates: { lat: 32.7222, lng: -16.9282 },
     duration: '3–4h (sens unique Arieiro → Ruivo)',
@@ -384,8 +383,8 @@ Prévoir 3–4h dans le sens Arieiro → Ruivo, un taxi ou navette pour le retou
 
 Au bout, une cascade tombe dans un bassin naturel entouré de parois couvertes de végétation tropicale. Le retour se fait par le même chemin — mais la lumière change et c'est comme deux randonnées.`,
     photos: [
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80',
+      'https://images.unsplash.com/photo-1596626557070-00566130cada?w=1200&q=80',
+      'https://images.unsplash.com/photo-1554485545-0311ecc6b4df?w=1200&q=80',
     ],
     coordinates: { lat: 32.7897, lng: -16.8953 },
     duration: '4h (aller-retour)',
@@ -404,8 +403,8 @@ Au bout, une cascade tombe dans un bassin naturel entouré de parois couvertes d
 
 La forêt de lauriers et de bruyères géantes qui les entoure est une des plus belles de l'île. Le sentier est plat et bien balisé — c'est une des randonnées les plus accessibles pour un résultat parmi les plus spectaculaires de Madère.`,
     photos: [
-      'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=1200&q=80',
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
+      'https://images.unsplash.com/photo-1710232154308-423205f1797c?w=1200&q=80',
+      'https://images.unsplash.com/photo-1721241843522-4f86c0571509?w=1200&q=80',
     ],
     coordinates: { lat: 32.7681, lng: -17.0797 },
     duration: '3h–4h (boucle Risco + 25 Fontes)',
@@ -424,8 +423,8 @@ La forêt de lauriers et de bruyères géantes qui les entoure est une des plus 
 
 Des pinsons des neiges de Madère viennent souvent manger dans la main au belvédère — un moment étonnant. C'est court, facile et magnifique. À combiner avec le vivier à truites de Ribeiro Frio juste à côté.`,
     photos: [
-      'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80',
+      'https://images.unsplash.com/photo-1721400501513-d803bf474ce2?w=1200&q=80',
+      'https://images.unsplash.com/photo-1689349666953-e8d81553fda2?w=1200&q=80',
     ],
     coordinates: { lat: 32.7355, lng: -16.8863 },
     duration: '1h (aller-retour)',
@@ -444,8 +443,8 @@ Des pinsons des neiges de Madère viennent souvent manger dans la main au belvé
 
 Plusieurs sentiers partent de là. Le plus simple est une boucle d'une heure dans la forêt elle-même. Le matin tôt, avant que la brume ne se lève, est le moment le plus magique — et le plus souvent vide de touristes.`,
     photos: [
-      'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80',
-      'https://images.unsplash.com/photo-1516815231560-8f41ec531527?w=1200&q=80',
+      'https://images.unsplash.com/photo-1746523812349-25b9226fa307?w=1200&q=80',
+      'https://images.unsplash.com/photo-1665305110055-5a6c975b07cd?w=1200&q=80',
     ],
     coordinates: { lat: 32.8314, lng: -17.1108 },
     duration: '1h–2h',
@@ -464,8 +463,8 @@ Plusieurs sentiers partent de là. Le plus simple est une boucle d'une heure dan
 
 Par temps clair, on voit Porto Santo à l'horizon. Vent fort assuré — et c'est ce qui rend la rando grisante. À faire tôt le matin pour éviter la chaleur et la foule.`,
     photos: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80',
+      'https://images.unsplash.com/photo-1709927544612-eb10533d011b?w=1200&q=80',
+      'https://images.unsplash.com/photo-1691588638068-c54a388b31a3?w=1200&q=80',
     ],
     coordinates: { lat: 32.7408, lng: -16.7053 },
     duration: '3h–4h (aller-retour)',
@@ -486,8 +485,8 @@ Par temps clair, on voit Porto Santo à l'horizon. Vent fort assuré — et c'es
 
 Le village derrière mérite une balade : maisons colorées, bar à jus de canne à sucre, terrasse avec vue sur l'Aigle — le rocher emblématique qui garde l'entrée de la baie.`,
     photos: [
-      'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1200&q=80',
-      'https://images.unsplash.com/photo-1455264745730-cb3b76250d08?w=1200&q=80',
+      'https://images.unsplash.com/photo-1685137302358-8af0868460db?w=1200&q=80',
+      'https://images.unsplash.com/photo-1585233768033-2b0ff7efc711?w=1200&q=80',
     ],
     coordinates: { lat: 32.7736, lng: -16.8413 },
     duration: '2–3h (cours) / toute la journée',
@@ -506,8 +505,8 @@ Le village derrière mérite une balade : maisons colorées, bar à jus de canne
 
 Le village, accessible par un tunnel creusé dans la falaise, est calme et un peu hors du monde. À réserver aux surfeurs avec un minimum d'expérience. En été, la houle est plus faible mais la vague reste propre et bien formée.`,
     photos: [
-      'https://images.unsplash.com/photo-1531722569936-825d4eee6812?w=1200&q=80',
-      'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1200&q=80',
+      'https://images.unsplash.com/photo-1733254734390-a31f887266a6?w=1200&q=80',
+      'https://images.unsplash.com/photo-1644773357253-86decfe52166?w=1200&q=80',
     ],
     coordinates: { lat: 32.7639, lng: -17.2083 },
     duration: '2–4h',
@@ -528,8 +527,8 @@ Le village, accessible par un tunnel creusé dans la falaise, est calme et un pe
 
 La salle est simple, les prix raisonnables, la viande irréprochable. C'est le genre d'endroit où les locaux emmènent leurs familles le week-end. Réservation recommandée.`,
     photos: [
-      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80',
-      'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1200&q=80',
+      'https://images.unsplash.com/photo-1725714354476-7fc04f7d38a6?w=1200&q=80',
+      'https://images.unsplash.com/photo-1703303101395-48ecb0572a4d?w=1200&q=80',
     ],
     coordinates: { lat: 32.6503, lng: -16.9775 },
     duration: '1h30–2h',
@@ -547,8 +546,8 @@ La salle est simple, les prix raisonnables, la viande irréprochable. C'est le g
 
 Mais pour ceux que le caractère amuse, c'est une des tables les plus mémorables de la côte sud-ouest. La terrasse donne sur la mer et les falaises. Il vaut mieux ne pas arriver avec une idée précise de ce qu'on veut manger.`,
     photos: [
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80',
-      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80',
+      'https://images.unsplash.com/photo-1774971295729-682dcb737644?w=1200&q=80',
+      'https://images.unsplash.com/photo-1656937969203-0e13eb484b86?w=1200&q=80',
     ],
     coordinates: { lat: 32.7156, lng: -17.1286 },
     duration: '1h30–2h',
@@ -566,8 +565,8 @@ Mais pour ceux que le caractère amuse, c'est une des tables les plus mémorable
 
 L'espada noire grillée au beurre et les légumes du potager font partie des meilleures choses qu'on puisse manger sur l'île. Le cadre est sauvage, l'accueil chaleureux, les prix dérisoires. À ne pas confondre avec le restaurant touristique du même nom à Funchal.`,
     photos: [
-      'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1200&q=80',
-      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80',
+      'https://images.unsplash.com/photo-1643275477296-5db35ec00918?w=1200&q=80',
+      'https://images.unsplash.com/photo-1654871924265-c8940d68c464?w=1200&q=80',
     ],
     coordinates: { lat: 32.8408, lng: -17.1097 },
     duration: '1h30–2h',
@@ -585,8 +584,8 @@ L'espada noire grillée au beurre et les légumes du potager font partie des mei
 
 C'est une des adresses les plus appréciées des locaux sur toute la côte sud-ouest. On y vient pour la poncha, on y reste pour l'ambiance. À quelques minutes de Câmara de Lobos, en montant vers les hauteurs.`,
     photos: [
-      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=1200&q=80',
-      'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1200&q=80',
+      'https://images.unsplash.com/photo-1611261885548-653d0fd986c4?w=1200&q=80',
+      'https://images.unsplash.com/photo-1542600176-9d2c4bb4bc1a?w=1200&q=80',
     ],
     coordinates: { lat: 32.6697, lng: -17.0064 },
     duration: '1–2h',
@@ -604,8 +603,8 @@ C'est une des adresses les plus appréciées des locaux sur toute la côte sud-o
 
 Le bar est coloré, décontracté, avec la plus grande collection de rhums de l'île — plus de 100 références. L'happy hour au coucher du soleil depuis la terrasse, avec vue sur la vague de Jardim do Mar, est un des moments les plus plaisants de la côte ouest.`,
     photos: [
-      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=1200&q=80',
-      'https://images.unsplash.com/photo-1573126617899-41f1dffb196c?w=1200&q=80',
+      'https://images.unsplash.com/photo-1718824447473-b24ccc9bcf17?w=1200&q=80',
+      'https://images.unsplash.com/photo-1719262883659-2dd4088b5977?w=1200&q=80',
     ],
     coordinates: { lat: 32.7419, lng: -17.2272 },
     duration: '1–3h',
@@ -623,8 +622,8 @@ Le bar est coloré, décontracté, avec la plus grande collection de rhums de l'
 
 La terrasse donne sur les bateaux et l'Atlantique. C'est simple, régulier et toujours bon — une adresse qu'on recommande depuis des années aux voyageurs qui passent par Calheta. Ouvert tous les jours de 12h à 22h.`,
     photos: [
-      'https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=1200&q=80',
-      'https://images.unsplash.com/photo-1578374173703-5f1e4d45ef8f?w=1200&q=80',
+      'https://images.unsplash.com/photo-1621538997517-58ce53933faa?w=1200&q=80',
+      'https://images.unsplash.com/photo-1630253775921-9b79ecf5a565?w=1200&q=80',
     ],
     coordinates: { lat: 32.7183, lng: -17.1706 },
     duration: '1h–1h30',
