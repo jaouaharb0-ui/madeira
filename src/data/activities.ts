@@ -613,25 +613,6 @@ Le bar est coloré, décontracté, avec la plus grande collection de rhums de l'
     address: 'Jardim do Mar, Calheta',
   },
 
-  {
-    slug: 'manifattura-di-gelato',
-    name: 'Manifattura di Gelato',
-    type: 'restaurant',
-    shortDescription: "Pizza napolitaine et glaces artisanales à la marina de Calheta — la meilleure pizza de l'île, de l'avis général.",
-    longDescription: `Dans le cadre improbable d'une marina de plaisance sur la côte ouest de Madère, Manifattura di Gelato sert une pizza napolitaine authentique — pâte fine, cuisson au feu de bois, ingrédients italiens — et des glaces artisanales qui finissent chaque repas en beauté.
-
-La terrasse donne sur les bateaux et l'Atlantique. C'est simple, régulier et toujours bon — une adresse qu'on recommande depuis des années aux voyageurs qui passent par Calheta. Ouvert tous les jours de 12h à 22h.`,
-    photos: [
-      'https://images.unsplash.com/photo-1621538997517-58ce53933faa?w=1200&q=80',
-      'https://images.unsplash.com/photo-1630253775921-9b79ecf5a565?w=1200&q=80',
-    ],
-    coordinates: { lat: 32.7183, lng: -17.1706 },
-    duration: '1h–1h30',
-    bestTime: 'Déjeuner ou dîner',
-    estimatedCost: '12–20€ par personne',
-    address: 'Marina da Calheta, Av. D. Manuel I, Calheta',
-  },
-
 ]
 
 export function getActivity(slug: string): Activity | undefined {
