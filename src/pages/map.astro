@@ -2,17 +2,17 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { activities } from '../data/activities'
 import { orderedDays, dayLabels } from '../data/trip'
+import { typeLabels, typeColors, typeIconPaths } from '../data/typeIcons'
 
 const base = import.meta.env.BASE_URL
 
-const typeConfig: Record<string, { label: string; color: string; icon: string }> = {
-  surf:       { label: 'Surf',         color: '#1E4A6B', icon: '🏄' },
-  rando:      { label: 'Randonnée',    color: '#3B6B45', icon: '🥾' },
-  restaurant: { label: 'Restaurant',   color: '#E06B2C', icon: '🍽' },
-  viewpoint:  { label: 'Point de vue', color: '#7FA8BE', icon: '🔭' },
-  swim:       { label: 'Baignade',     color: '#3A7599', icon: '🏊' },
-  village:    { label: 'Village',      color: '#8B6F47', icon: '🏘' },
-}
+// Config carte dérivée de la source unique (libellé + couleur)
+const typeConfig: Record<string, { label: string; color: string }> = Object.fromEntries(
+  Object.keys(typeLabels).map(t => [t, { label: typeLabels[t], color: typeColors[t] }])
+)
+
+// Icônes Lucide (tracés inline) pour la légende et les pins
+const legendIcons = typeIconPaths
 
 const activitiesJson = JSON.stringify(activities.map(a => ({
   slug: a.slug,
@@ -24,6 +24,7 @@ const activitiesJson = JSON.stringify(activities.map(a => ({
 })))
 
 const typeConfigJson = JSON.stringify(typeConfig)
+const legendIconsJson = JSON.stringify(legendIcons)
 const baseUrl = base
 
 // Mapping jour → {dayNumber, long} pour le script Leaflet
@@ -34,51 +35,78 @@ const dayLabelsJson = JSON.stringify(
 
 <BaseLayout title="Carte" description="Carte interactive de tous nos spots à Madère.">
   <div class="map-page">
-    <div class="map-controls">
-
-      <!-- Filtres par type -->
-      <div class="map-filters" role="group" aria-label="Filtrer par type">
-        <button class="map-filter-btn type-filter-btn active" data-type="all">Tout</button>
-        {Object.entries(typeConfig).map(([type, cfg]) => (
-          <button class="map-filter-btn type-filter-btn" data-type={type} style={`--dot: ${cfg.color}`}>
-            <span class="mfb-dot"></span>
-            {cfg.label}
-          </button>
-        ))}
-      </div>
-
-      <!-- Filtres par jour (populé dynamiquement — grisé si aucune activité ce jour-là) -->
-      <div class="map-day-filters" id="day-filters" role="group" aria-label="Filtrer par jour">
-        <button class="day-filter-btn active" data-day="all">Tous les jours</button>
-        {orderedDays.map(d => (
-          <button class="day-filter-btn" data-day={d} id={`dfbtn-${d}`}>
-            J{dayLabels[d].dayNumber}
-          </button>
-        ))}
-      </div>
-
-      <!-- Légende types -->
-      <div class="map-legend">
-        {Object.entries(typeConfig).map(([type, cfg]) => (
-          <span class="legend-item">
-            <span class="legend-dot" style={`background:${cfg.color}`}></span>
-            {cfg.label}
-          </span>
-        ))}
-      </div>
-    </div>
-
     <div id="map" class="map-container"></div>
+  </div>
+
+  <div class="map-controls">
+
+      <!-- Bouton d'ouverture du panneau de filtres -->
+      <button
+        class="filters-toggle"
+        id="filters-toggle"
+        aria-expanded="false"
+        aria-controls="filters-panel"
+      >
+        <svg class="filters-toggle-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M3 5h18M6 12h12M10 19h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+        </svg>
+        Filtres
+        <span class="filters-badge" id="filters-badge" hidden></span>
+      </button>
+
+      <!-- Panneau de filtres (ouvre au clic) -->
+      <div class="filters-panel" id="filters-panel">
+
+        <!-- Filtres par type -->
+        <div class="map-filters" role="group" aria-label="Filtrer par type">
+          <button class="map-filter-btn type-filter-btn active" data-type="all">Tout</button>
+          {Object.entries(typeConfig).map(([type, cfg]) => (
+            <button class="map-filter-btn type-filter-btn" data-type={type} style={`--dot: ${cfg.color}`}>
+              <span class="mfb-dot"></span>
+              {cfg.label}
+            </button>
+          ))}
+        </div>
+
+        <!-- Filtres par jour (populé dynamiquement — grisé si aucune activité ce jour-là) -->
+        <div class="map-day-filters" id="day-filters" role="group" aria-label="Filtrer par jour">
+          <button class="day-filter-btn active" data-day="all">Tous les jours</button>
+          {orderedDays.map(d => (
+            <button class="day-filter-btn" data-day={d} id={`dfbtn-${d}`}>
+              J{dayLabels[d].dayNumber}
+            </button>
+          ))}
+        </div>
+      </div>
+  </div>
+
+  <!-- Légende types (toujours visible, en bas à gauche) -->
+  <div class="map-legend">
+    {Object.entries(typeConfig).map(([type, cfg]) => (
+      <span class="legend-item">
+        <span class="legend-icon" style={`background:${cfg.color}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={legendIcons[type]} />
+        </span>
+        {cfg.label}
+      </span>
+    ))}
   </div>
 </BaseLayout>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" is:inline></script>
 
-<script define:vars={{ activitiesJson, typeConfigJson, baseUrl, dayLabelsJson }}>
+<script define:vars={{ activitiesJson, typeConfigJson, legendIconsJson, baseUrl, dayLabelsJson }}>
   const activities  = JSON.parse(activitiesJson)
   const typeConfig  = JSON.parse(typeConfigJson)
+  const legendIcons = JSON.parse(legendIconsJson)
   const dayLabels   = JSON.parse(dayLabelsJson)
+
+  // Construit un SVG Lucide inline (blanc) pour un type donné
+  function iconSvg(type, size = 16, color = 'white') {
+    const paths = legendIcons[type] || ''
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="${size}" height="${size}">${paths}</svg>`
+  }
 
   // ── État des filtres ──────────────────────────────────────────────────────
   let activeType = 'all'
@@ -99,16 +127,17 @@ const dayLabelsJson = JSON.stringify(
   function makeIcon(type, active = true, dayNumber = null) {
     const cfg     = typeConfig[type] || typeConfig.other
     const color   = cfg.color
-    const opacity = active ? '1' : '0.35'
+    const opacity = active ? '1' : '0'
+    const events  = active ? 'auto' : 'none'
     const badge   = dayNumber
       ? `<span style="position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;background:white;border:1.5px solid ${color};border-radius:50%;font-size:8px;font-weight:700;color:${color};display:flex;align-items:center;justify-content:center;line-height:1;padding:0 2px">${dayNumber}</span>`
       : ''
     return L.divIcon({
       className: '',
       html: `
-        <div style="position:relative;width:36px;height:36px;opacity:${opacity};transition:opacity .2s">
+        <div style="position:relative;width:36px;height:36px;opacity:${opacity};pointer-events:${events};transition:opacity .2s">
           <div style="width:36px;height:36px;background:${color};border:3px solid #E8E4DD;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);box-shadow:0 4px 16px rgba(22,26,29,.35)"></div>
-          <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);font-size:14px;line-height:1">${cfg.icon}</span>
+          <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);display:flex;line-height:0">${iconSvg(type)}</span>
           ${badge}
         </div>
       `,
@@ -137,7 +166,7 @@ const dayLabelsJson = JSON.stringify(
       <div class="popup-inner">
         <img class="popup-photo" src="${activity.photo}" alt="${activity.name}" width="88" height="88" />
         <div class="popup-body">
-          <p class="popup-type">${cfg.icon} ${cfg.label}</p>
+          <p class="popup-type">${iconSvg(activity.type, 12, cfg.color)} ${cfg.label}</p>
           <h3 class="popup-title">${activity.name}</h3>
           <span class="popup-day" id="popup-day-${activity.slug}"></span>
           <a href="${baseUrl}activities/${activity.slug}/" class="popup-link">Voir la fiche →</a>
@@ -167,7 +196,43 @@ const dayLabelsJson = JSON.stringify(
       )
       if (!show) markersBySlug[activity.slug].closePopup()
     })
+    updateFiltersBadge()
   }
+
+  // ── Badge : nombre de filtres actifs sur le bouton ────────────────────────
+  function updateFiltersBadge() {
+    const count = (activeType !== 'all' ? 1 : 0) + (activeDay !== 'all' ? 1 : 0)
+    const badge = document.getElementById('filters-badge')
+    if (!badge) return
+    if (count > 0) {
+      badge.textContent = String(count)
+      badge.hidden = false
+    } else {
+      badge.hidden = true
+    }
+  }
+
+  // ── Ouverture / fermeture du panneau de filtres ───────────────────────────
+  const mapControls = document.querySelector('.map-controls')
+  const filtersToggle = document.getElementById('filters-toggle')
+  filtersToggle.addEventListener('click', (e) => {
+    e.stopPropagation()
+    const open = mapControls.classList.toggle('open')
+    filtersToggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+    if (open) map.closePopup()
+  })
+  document.addEventListener('click', (e) => {
+    if (mapControls.classList.contains('open') && !mapControls.contains(e.target)) {
+      mapControls.classList.remove('open')
+      filtersToggle.setAttribute('aria-expanded', 'false')
+    }
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mapControls.classList.contains('open')) {
+      mapControls.classList.remove('open')
+      filtersToggle.setAttribute('aria-expanded', 'false')
+    }
+  })
 
   // ── Filtres type ──────────────────────────────────────────────────────────
   document.querySelectorAll('.type-filter-btn').forEach(btn => {
@@ -254,11 +319,11 @@ const dayLabelsJson = JSON.stringify(
 
   /* ── Contrôles flottants ────────────────────────────────────────────── */
   .map-controls {
-    position: absolute;
-    top: 5rem;
+    position: fixed;
+    top: 1rem;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 500;
+    z-index: 600;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -266,11 +331,77 @@ const dayLabelsJson = JSON.stringify(
     pointer-events: none;
   }
 
+  /* ── Bouton d'ouverture ─────────────────────────────────────────────── */
+  .filters-toggle {
+    pointer-events: all;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid rgba(216, 210, 200, 0.8);
+    border-radius: 100px;
+    background: rgba(232, 228, 221, 0.92);
+    backdrop-filter: blur(12px);
+    color: var(--color-basalt);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(22,26,29,0.18);
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .filters-toggle:hover { background: rgba(232, 228, 221, 1); }
+  .map-controls.open .filters-toggle {
+    background: var(--color-basalt);
+    color: var(--color-stone);
+  }
+
+  .filters-toggle-icon { flex-shrink: 0; }
+
+  .filters-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 100px;
+    background: var(--color-paradise);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* ── Panneau de filtres (collapsible) ───────────────────────────────── */
+  .filters-panel {
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  }
+
+  .map-controls.open .filters-panel {
+    pointer-events: all;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
   .map-filters {
     display: flex;
     gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
+    max-width: 100%;
     pointer-events: all;
     background: rgba(232, 228, 221, 0.92);
     backdrop-filter: blur(12px);
@@ -349,32 +480,47 @@ const dayLabelsJson = JSON.stringify(
 
   /* ── Légende ────────────────────────────────────────────────────────── */
   .map-legend {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 600;
     display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
     background: rgba(232, 228, 221, 0.85);
     backdrop-filter: blur(8px);
-    border-radius: 100px;
-    padding: 0.4rem 1.25rem;
+    border: 1px solid rgba(216, 210, 200, 0.7);
+    border-radius: 16px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 16px rgba(22,26,29,0.12);
     pointer-events: none;
   }
 
   .legend-item {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.5rem;
     font-size: 11px;
     font-weight: 500;
     color: var(--color-basalt-soft);
     letter-spacing: 0.04em;
   }
 
-  .legend-dot {
-    width: 8px;
-    height: 8px;
+  .legend-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     flex-shrink: 0;
+    color: white;
+    box-shadow: 0 1px 3px rgba(22,26,29,0.2);
+  }
+
+  .legend-icon svg {
+    width: 13px;
+    height: 13px;
   }
 
   /* ── Popup ──────────────────────────────────────────────────────────── */
@@ -417,11 +563,18 @@ const dayLabelsJson = JSON.stringify(
   }
 
   :global(.popup-type) {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #7A8A92;
+  }
+
+  :global(.popup-type svg) {
+    flex-shrink: 0;
   }
 
   :global(.popup-title) {

@@ -1,0 +1,33 @@
+---
+// Puce « icône Lucide + libellé » pour un type d'activité.
+// Hérite de la couleur du texte parent (icône en currentColor).
+import { typeLabels, typeIconSvg } from '../data/typeIcons'
+
+interface Props {
+  type: string
+  size?: number
+  class?: string
+}
+
+const { type, size = 14, class: className } = Astro.props
+---
+
+<span class:list={['type-tag', className]}>
+  <span class="type-tag-ic" set:html={typeIconSvg(type, { size })} />
+  {typeLabels[type]}
+</span>
+
+<style>
+  .type-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .type-tag-ic {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+  .type-tag-ic :global(svg) {
+    display: block;
+  }
+</style>

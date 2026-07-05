@@ -1,26 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import TypeTag from '../../components/TypeTag.astro'
 import { activities } from '../../data/activities'
 
 const base = import.meta.env.BASE_URL
-
-const typeLabels: Record<string, string> = {
-  surf: 'Surf',
-  rando: 'Randonnée',
-  restaurant: 'Restaurant',
-  viewpoint: 'Point de vue',
-  swim: 'Baignade',
-  village: 'Village',
-}
-
-const typeIcons: Record<string, string> = {
-  surf: '🏄',
-  rando: '🥾',
-  restaurant: '🍽',
-  viewpoint: '🔭',
-  swim: '🏊',
-  village: '🏘',
-}
 
 const allTypes = [...new Set(activities.map(a => a.type))]
 ---
@@ -41,7 +24,7 @@ const allTypes = [...new Set(activities.map(a => a.type))]
         <button class="filter-btn active" data-filter="all">Tout voir</button>
         {allTypes.map(type => (
           <button class="filter-btn" data-filter={type}>
-            {typeIcons[type]} {typeLabels[type]}
+            <TypeTag type={type} />
           </button>
         ))}
       </div>
@@ -63,7 +46,7 @@ const allTypes = [...new Set(activities.map(a => a.type))]
               />
               <div class="card-photo-overlay"></div>
               <span class="card-type-chip">
-                {typeIcons[activity.type]} {typeLabels[activity.type]}
+                <TypeTag type={activity.type} />
               </span>
             </div>
             <div class="card-body">
