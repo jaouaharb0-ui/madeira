@@ -66,21 +66,9 @@ const base = import.meta.env.BASE_URL
   import { activities } from '../data/activities'
   import { orderedDays, dayLabels } from '../data/trip'
   import type { Day } from '../data/trip'
+  import { typeLabels, typeColors, typeIconSvg } from '../data/typeIcons'
 
   const base = import.meta.env.BASE_URL
-
-  const typeLabels: Record<string, string> = {
-    surf: 'Surf', rando: 'Randonnée', restaurant: 'Restaurant',
-    viewpoint: 'Point de vue', swim: 'Baignade', village: 'Village',
-  }
-  const typeIcons: Record<string, string> = {
-    surf: '🏄', rando: '🥾', restaurant: '🍽',
-    viewpoint: '🔭', swim: '🏊', village: '🏘',
-  }
-  const typeColors: Record<string, string> = {
-    surf: '#1E4A6B', rando: '#3B6B45', restaurant: '#E06B2C',
-    viewpoint: '#7FA8BE', swim: '#3A7599', village: '#8B6F47',
-  }
 
   // ── Templates HTML ──────────────────────────────────────────────────────────
 
@@ -117,7 +105,7 @@ const base = import.meta.env.BASE_URL
           <img src="${a.photos[0]}" alt="${a.name}" loading="lazy" />
         </div>
         <div class="pcard-body">
-          <p class="pcard-type" style="color:${typeColors[a.type]}">${typeIcons[a.type]} ${typeLabels[a.type]}</p>
+          <p class="pcard-type" style="color:${typeColors[a.type]}">${typeIconSvg(a.type, { size: 13 })} <span>${typeLabels[a.type]}</span></p>
           <h3 class="pcard-name">${a.name}</h3>
           ${a.duration ? `<p class="pcard-meta">⏱ ${a.duration}</p>` : ''}
         </div>
@@ -472,7 +460,8 @@ const base = import.meta.env.BASE_URL
     min-width: 0;
   }
 
-  :global(.pcard-type) { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+  :global(.pcard-type) { display: flex; align-items: center; gap: 0.35em; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+  :global(.pcard-type svg) { flex-shrink: 0; }
 
   :global(.pcard-name) {
     font-family: var(--font-display);
